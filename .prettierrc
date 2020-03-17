@@ -1,0 +1,27 @@
+{
+	"printWidth": 120,
+	"tabWidth": 4,
+	"useTabs": true,
+	"semi": true,
+	"singleQuote": true,
+	"bracketSpacing": true,
+	"jsxBracketSameLine": false,
+	"arrowParens": "avoid",
+	"trailingComma": "none",
+	"vetur.format.defaultFormatter.html": "prettier",
+    "vetur.format.defaultFormatter.js": "prettier",
+    "vetur.format.defaultFormatter.less": "prettier",
+    "vetur.format.defaultFormatterOptions": {
+        "prettier": {
+			"printWidth": 120,
+			"tabWidth": 4,
+			"useTabs": true,
+			"semi": true,
+			"singleQuote": true,
+			"bracketSpacing": true,
+			"jsxBracketSameLine": false,
+			"arrowParens": "avoid",
+			"trailingComma": "none"
+        }
+    }
+}

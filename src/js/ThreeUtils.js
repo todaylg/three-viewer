@@ -31,7 +31,7 @@ function adjustSunLightByBox(light, scene, object, debug){
 	lightCamera.position.set(0, 0, 0);
 	lightCamera.updateMatrixWorld(true);
 
-	// Box(near\far\top...boundingBox) from lightCamera view space to world space
+	// Box(near\far\top...boundingBox) from world space to lightCamera view space
 	let cameraInverseMatrix = new THREE.Matrix4();
 	cameraInverseMatrix.getInverse(lightCamera.matrixWorld);
 	box.applyMatrix4(cameraInverseMatrix);

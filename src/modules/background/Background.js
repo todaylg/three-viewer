@@ -13,8 +13,8 @@ import { BackgroundMaterial } from './BackgroundMaterial';
 
 	get envMap() {
 		return this.material.envMap;
-
 	}
+	
 	set envMap(envMap) {
 		this.material.envMap = envMap;
 	}

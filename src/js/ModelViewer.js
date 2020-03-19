@@ -74,8 +74,8 @@ export default class ModelViewer {
 			this.background.material.uniforms.uEnvironmentTransform = this.envRotationMat;
 		} else {
 			// Update new background
-			(this.background.material.uniforms.envMap.value = backgroundEnv.cubeTexture),
-				(this.background.material.uniforms.uEnvironmentSize.value = uBGEnvironmentSize);
+			this.background.material.uniforms.envMap.value = backgroundEnv.cubeTexture;
+			this.background.material.uniforms.uEnvironmentSize.value = uBGEnvironmentSize;
 		}
 	}
 

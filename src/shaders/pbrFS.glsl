@@ -329,8 +329,6 @@ float occlusionHorizon(const in float ao, const in vec3 normal, const in vec3 vi
     return clamp((d * d) - 1.0 + ao, 0.0, 1.0);
 }
 
-#pragma glslify: rotationMatrix3 = require(./math/rotationMatrix3.glsl);
-
 void main(){
     vec3 viewDir = -normalize(vViewPosition);
     environmentTransform = getEnvironmentTransfrom(uEnvironmentTransform);

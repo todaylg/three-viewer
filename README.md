@@ -4,7 +4,9 @@ PBR rendering experiment of a single model, convenient comparison of rendering e
 
 [Online Demo](https://todaylg.github.io/three-viewer/)
 
-![image](https://github.com/todaylg/three-viewer/blob/master/intro/intro.png)
+![image](https://github.com/todaylg/three-viewer/blob/master/intro/zelda.png)
+
+![image](https://github.com/todaylg/three-viewer/blob/master/intro/masterSword.png)
 
 ### Feature
 

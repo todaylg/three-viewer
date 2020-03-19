@@ -26,7 +26,7 @@ vec3 cubemapSeamlessFixDirection(const in vec3 direction, const in float scale )
 }
 
 vec4 textureCubemap(const in samplerCube tex, const in vec3 dir ){
-    vec4 rgba = textureCube( tex, dir );
+    vec4 rgba = textureCube(tex, dir);
     return LogLuvToLinear(rgba);
 }
 
@@ -34,13 +34,13 @@ vec4 textureCubemap(const in samplerCube tex, const in vec3 dir ){
 vec4 textureCubeFixed(const in samplerCube tex, const in vec3 direction ){
     // http://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering/
     float scale = 1.0 - 1.0 / uEnvironmentSize[0];
-    vec3 dir = cubemapSeamlessFixDirection( direction, scale);
-    return textureCubemap( tex, dir );
+    vec3 dir = cubemapSeamlessFixDirection(direction, scale);
+    return textureCubemap(tex, dir);
 }
 
 void main(){
     vec3 direction = normalize(vViewNormal);
-    direction = getEnvironmentTransfrom( uEnvironmentTransform ) * direction;
+    direction = getEnvironmentTransfrom(uEnvironmentTransform) * direction;
     vec4 samplerColor = uEnvBrightness * textureCubeFixed(envMap, direction);
     gl_FragColor = LinearTosRGB(samplerColor);
 }

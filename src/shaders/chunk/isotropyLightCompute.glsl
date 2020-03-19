@@ -33,8 +33,7 @@ float Specular_D(vec3 precomputeLight, float NoH){
 #elif defined(NDF_GGX)
     return D_GGX(precomputeLight, NoH);
 #else
-return D_GGX(precomputeLight, NoH);
-    return 1.0;
+    return D_GGX(precomputeLight, NoH);
 #endif
 }
 
@@ -55,7 +54,7 @@ vec3 F_CookTorrance(float VoH, vec3 f0, float f90){
     vec3 part1 = (g - c)/(g + c);
     vec3 part2 = ((g + c) * c - 1.0)/((g - c) * c + 1.0);
 
-    return max(vec3(0.0), 0.5 * part1 * part1 * ( 1.0 + part2 * part2));
+    return max(vec3(0.0), 0.5 * part1 * part1 * (1.0 + part2 * part2));
 }
 
 vec3 F_None(vec3 f0){
@@ -72,7 +71,7 @@ vec3 Specular_F(float VoH, vec3 f0, float f90){
 #endif
 }
 
-// ******************************** Geometry Shadowing *********************************
+// ******************************** Visibility Term *********************************
 float Vis_Implicit(){
 	return 0.25;
 }
@@ -100,8 +99,8 @@ float Vis_Schlick(vec3 precomputeLight, float NoL){
 	return 0.25 / (Vis_SchlickV * Vis_SchlickL);
 }
 
-// // Smith term for GGX
-// // [Smith 1967, "Geometrical shadowing of a random rough surface"]
+// Smith term for GGX
+// [Smith 1967, "Geometrical shadowing of a random rough surface"]
 float Vis_Smith(vec3 precomputeLight, float NoL){
 	float a2 = precomputeLight.y;
 	float NoV = precomputeLight.z;

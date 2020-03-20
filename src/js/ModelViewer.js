@@ -11,7 +11,8 @@ import {
 	diffuseEquation,
 	specularNDFEquation,
 	specularFresnelEquation,
-	specularVisEquation
+	specularVisEquation,
+	toneMappingList
 } from '../const/config';
 import { pbrDefaultDefines } from '../const/defaultParams';
 // Utils
@@ -80,7 +81,6 @@ export default class ModelViewer {
 	}
 
 	async updateEnvMap(envMapName, callBack) {
-		console.log('updateEnvMap: ', envMapName);
 		let environment = await this.loadEnvMap(envMapName);
 		let {
 			cubeMapEnv,
@@ -224,6 +224,8 @@ export default class ModelViewer {
 			specularFresnelEquation: specularFresnelEquation[0],
 			specularNDFEquation: specularNDFEquation[0],
 			specularVisEquation: specularVisEquation[0],
+			// Post
+			toneMapping: toneMappingList[0]
 		});
 		// PBR
 		const pbrFolder = gui.addFolder('PBR');
@@ -296,6 +298,13 @@ export default class ModelViewer {
 			this.reCompileShader();
 		});
 		equationsFolder.open();
+
+		const postFolder = gui.addFolder('Post-Processing');
+		postFolder.add(params, 'toneMapping', toneMappingList).onChange(value => {
+			console.log(THREE[`${value}ToneMapping`]);
+			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
+			this.reCompileShader(true);
+		});
 	}
 
 	getDefinesFromGUI() {
@@ -312,7 +321,7 @@ export default class ModelViewer {
 		return defines;
 	}
 
-	reCompileShader() {
+	reCompileShader(updateBG) {
 		let defines = this.getDefinesFromGUI();
 		this.gltfScene.traverse(child => {
 			if (child.isMesh && child.material) {
@@ -320,6 +329,7 @@ export default class ModelViewer {
 				child.material.needsUpdate = true;
 			}
 		});
+		if(updateBG) this.background.material.needsUpdate = true;
 	}
 
 	syncEnvTransform() {

@@ -40,11 +40,21 @@ const specularVisEquation = [
 	'Smith',
 ];
 
+const toneMappingList = [
+	'Linear',
+	'Reinhard',
+	'Uncharted2',
+	'Cineon',
+	'ACESFilmic',
+	'No',
+];
+
 export {
     envMapPath,
     envMapList,
     diffuseEquation,
     specularFresnelEquation,
     specularNDFEquation,
-    specularVisEquation
+	specularVisEquation,
+	toneMappingList
 }

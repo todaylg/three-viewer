@@ -41,11 +41,11 @@ const specularVisEquation = [
 ];
 
 const toneMappingList = [
+	'ACESFilmic',
 	'Linear',
 	'Reinhard',
 	'Uncharted2',
 	'Cineon',
-	'ACESFilmic',
 	'No',
 ];
 

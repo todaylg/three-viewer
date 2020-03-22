@@ -38,6 +38,7 @@ export default class ModelViewer {
 		this.envBrightness = { value: 1.0 };
 
 		this.renderer = mainScene.renderer;
+		this.renderer.toneMapping = THREE[`${toneMappingList[0]}ToneMapping`];
 		this.scene = mainScene.scene;
 		this.camera = mainScene.camera;
 		this.container = mainScene.container;

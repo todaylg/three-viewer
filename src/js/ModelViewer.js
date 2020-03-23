@@ -30,11 +30,7 @@ export default class ModelViewer {
 		this.isMobile = isMobile();
 		// Env Rotation
 		this.envRotation = 0;
-		this.envRotationFromPanel = new THREE.Matrix4();
 		this.envRotationMat = { value: new THREE.Matrix4().makeRotationY(this.envRotation) };
-		this.cameraRotationMatrix = new THREE.Matrix4();
-		this.invCameraQuaternion = new THREE.Quaternion();
-		this.oringinCameraMatrix = new THREE.Matrix4();
 		this.envBrightness = { value: 1.0 };
 
 		this.renderer = mainScene.renderer;
@@ -126,8 +122,7 @@ export default class ModelViewer {
 
 		this.loadSunLight(sunlightInfo);
 		this.loadBackground(backgroundEnv, uBGEnvironmentSize);
-		camera.add(this.background);
-		scene.add(camera);
+		scene.add(this.background);
 
 		// Load Model
 		let gltfScene = this.gltfScene;
@@ -333,24 +328,16 @@ export default class ModelViewer {
 		if(updateBG) this.background.material.needsUpdate = true;
 	}
 
-	syncEnvTransform() {
-		this.invCameraQuaternion.copy(this.camera.quaternion).conjugate();
-		this.cameraRotationMatrix.makeRotationFromQuaternion(this.invCameraQuaternion);
-		this.oringinCameraMatrix.extractRotation(this.camera.matrixWorld);
-	}
-
 	updateEnvironmentRotation(value) {
-		// Add panel rotation
-		this.envRotationFromPanel.makeRotationY(value);
-		this.envRotationMat.value.multiplyMatrices(this.cameraRotationMatrix, this.envRotationFromPanel);
+		// Get panel rotation
+		this.envRotationMat.value.makeRotationY(value);
 		// Direction compute by position
 		let resultSunlight = this.sunLightStartPos.clone();
-		resultSunlight.applyMatrix4(this.envRotationMat.value).applyMatrix4(this.oringinCameraMatrix);
+		resultSunlight.applyMatrix4(this.envRotationMat.value);
 		this.sunLight.position.copy(resultSunlight);
 	}
 
 	update() {
-		this.syncEnvTransform();
 		this.updateEnvironmentRotation(this.envRotation);
 		this.renderer.render(this.scene, this.camera);
 	}

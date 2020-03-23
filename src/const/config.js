@@ -2,7 +2,8 @@ const envMapPath = './assets/envMap/';
 
 const envMapList = [
     'Arches',
-    'GCanyon',
+	'GCanyon',
+	'Industrial',
     'Milkyway',
     'PaperMill',
     'Venice',

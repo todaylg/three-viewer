@@ -299,7 +299,11 @@ vec3 prefilterEnvMapCube(const in float rLinear, const in vec3 R) {
     if (absDir.y != M) dir.y *= scale;
     if (absDir.z != M) dir.z *= scale;
 
-    return LogLuvToLinear(textureCubeLodEXT(envMap, dir, lod)).rgb;
+    // #ifdef TEXTURE_LOD_EXT
+		return LogLuvToLinear(textureCubeLodEXT(envMap, dir, lod)).rgb;
+	// #else
+        // ToFix: Some mobie no support TEXTURE_LOD_EXT
+	// #endif
 }
 
 // From Sebastien Lagarde Moving Frostbite to PBR page 69

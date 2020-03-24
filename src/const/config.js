@@ -6,7 +6,8 @@ const envMapList = [
 	'Industrial',
     'Milkyway',
     'PaperMill',
-    'Venice',
+	'Venice',
+	'Royal',
     'TropicalRuins',
     'Alexs',
     'Pedestrian'

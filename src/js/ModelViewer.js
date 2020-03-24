@@ -122,8 +122,7 @@ export default class ModelViewer {
 
 		this.loadSunLight(sunlightInfo);
 		this.loadBackground(backgroundEnv, uBGEnvironmentSize);
-		camera.add(this.background);
-		scene.add(camera);
+		scene.add(this.background);
 
 		// Load Model
 		let gltfScene = this.gltfScene;

@@ -297,7 +297,6 @@ export default class ModelViewer {
 
 		const postFolder = gui.addFolder('Post-Processing');
 		postFolder.add(params, 'toneMapping', toneMappingList).onChange(value => {
-			console.log(THREE[`${value}ToneMapping`]);
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
 			this.reCompileShader(true);
 		});

@@ -9,16 +9,15 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		super();
 		this.modelNormalMatrix = new THREE.Matrix3();
 		this.copy(sourceMaterial);
-		this.defines = pbrDefaultDefines;
+		
+		this.defines = Object.assign({}, pbrDefaultDefines);
 		// VertexTangents rely on (vertexTangents && normalMap) in threejs
 		// if(this.vertexTangents) this.defines.USE_TANGENT = 1;
 		// Copy method no include normalMapType
 		this.normalMapType = sourceMaterial.normalMapType;
-
-		if(uniformsOpt.isMobile) this.defines.MOBILE = 1;
+		
 		// Uniforms
 		let UniformsLib = THREE.UniformsLib;
-		// Todo: Support specular-glossiness 
 		this.uniforms = THREE.UniformsUtils.merge([
 			UniformsLib.common,
 			UniformsLib.normalmap,
@@ -47,8 +46,13 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		this.vertexShader = pbrVS;
 		this.fragmentShader = pbrFS;
 		this.lights = true;
+
+		// Other
+		if(sourceMaterial.isGLTFSpecularGlossinessMaterial === true) this.initSGWorkflow(sourceMaterial);
+		if(uniformsOpt.isMobile) this.defines.MOBILE = 1;
+
 		// Sync worldNormal matrix
-		mesh.onBeforeRender = () =>{
+		mesh.onBeforeRender = () => {
 			this.modelNormalMatrix.getNormalMatrix(mesh.matrixWorld);
 		}
 	}
@@ -69,6 +73,22 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		});
 		// Special key
 		this.uniforms.diffuse.value = sourceMaterial.color || new Color(0xffffff);
+	}
+
+	initSGWorkflow(sourceMaterial){
+		console.log('SpecularGlossinessMaterial');
+		this.defines[`SPECULAR_GLOSSINESS`] = 1;
+		let { specular, glossiness, specularMap, glossinessMap } = sourceMaterial._extraUniforms;
+		if(specularMap.value){
+			this.defines[`USE_SPECULARMAP`] = 1;
+			this.uniforms[`specularMap`] = specularMap;
+		}
+		if(glossinessMap.value){
+			this.defines[`USE_GLOSSINESSMAP`] = 1;
+			this.uniforms[`glossinessMap`] = glossinessMap;
+		}
+		this.uniforms[`specularFactor`] = specular;
+		this.uniforms[`glossinessFactor`] = glossiness;
 	}
 }
 

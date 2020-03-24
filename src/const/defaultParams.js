@@ -54,13 +54,6 @@ const pbrDefaultUniforms = {
 	uOcclusionHorizon: {
 		value: 0
 	},
-	// Anisotropy
-	uAnisotropyRotation: {
-		value: 0
-	},
-	uAnisotropyFactor: {
-		value: 0
-	},
 };
 
 const pbrDefaultDefines = {

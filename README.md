@@ -48,13 +48,13 @@ npm run build
 
 ### Todo
 
+- [x] Specular Glossiness Material
+  
 - [ ] Anisotropy(GGX)
 
 - [ ] Clearcoat
 
 - [ ] Sheen
-
-- [ ] Specular gloss
 
 - [ ] MorphTarget/Skin Animation
 

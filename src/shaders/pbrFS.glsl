@@ -18,11 +18,21 @@ uniform float roughness;
 uniform float metalness;
 uniform float opacity;
 
+uniform samplerCube envMap;
+uniform vec2 uShadowDepthRange;
+
 varying vec3 vViewPosition;
 
-uniform samplerCube envMap;
-
-uniform vec2 uShadowDepthRange;
+#ifdef SPECULAR_GLOSSINESS
+    uniform vec3 specularFactor;
+    uniform float glossinessFactor;
+    #ifdef USE_SPECULARMAP
+	    uniform sampler2D specularMap;
+    #endif
+    #ifdef USE_GLOSSINESSMAP
+	    uniform sampler2D glossinessMap;
+    #endif
+#endif
 
 varying vec3 vNormal;
 #ifdef USE_TANGENT
@@ -340,17 +350,38 @@ void main(){
     #include <normal_fragment_begin>
 	#include <normal_fragment_maps>
     #include <map_fragment>
-    #include <roughnessmap_fragment>
-	#include <metalnessmap_fragment>
     #include <emissivemap_fragment>
-    // Material diffuse/specular (TODO: SpecularMap Support、F0 Param)
-    float f0 = 0.04;
-    vec3 materialSpecular = mix(vec3(f0), diffuseColor.rgb, metalnessFactor);
+
+    float roughnessVal;
+    #ifdef SPECULAR_GLOSSINESS
+        roughnessVal = glossinessFactor;
+        #ifdef USE_GLOSSINESSMAP
+            roughnessVal = texture2D(glossinessMap, vUv).a * glossinessFactor;
+        #endif
+        roughnessVal = 1.0 - roughnessVal;
+    #else
+        #include <roughnessmap_fragment>
+        roughnessVal = roughnessFactor;
+    #endif
+
+    vec3 materialSpecular;
+    vec3 materialDiffuse = diffuseColor.rgb;
+    #ifdef SPECULAR_GLOSSINESS
+        materialSpecular = specularFactor;
+        #ifdef USE_SPECULARMAP
+            materialSpecular = sRGBToLinear(texture2D(specularMap, vUv)).rgb * specularFactor;
+        #endif
+    #else
+        #include <metalnessmap_fragment>
+        float f0 = 0.04;
+        materialSpecular = mix(vec3(f0), diffuseColor.rgb, metalnessFactor);
+        materialDiffuse = diffuseColor.rgb * (1.0 - metalnessFactor);
+    #endif
+
     float materialF90 = clamp(50.0 * materialSpecular.g, 0.0, 1.0);
-    vec3 materialDiffuse = diffuseColor.rgb * (1.0 - metalnessFactor);
     // Roughness
     const float minRoughness = 0.001;
-    float materialRoughness = max(minRoughness , roughnessFactor);
+    float materialRoughness = max(minRoughness , roughnessVal);
 
     // IBL
     vec3 transformedNormal = environmentTransform * normal;

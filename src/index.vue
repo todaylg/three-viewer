@@ -42,7 +42,10 @@ export default {
 		};
 	},
 	mounted() {
-		this.initEvent();
+		// this.initEvent();
+		// Dev:
+		document.querySelector("#wrapper").classList.remove("isLoading");
+		this.loadDefaultMode();
 	},
 	methods: {
 		initScene(gltf) {

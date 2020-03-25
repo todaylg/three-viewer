@@ -4,18 +4,18 @@ import pbrFS from '../shaders/pbrFS';
 import { syncMapArr, syncUniformArr, pbrDefaultUniforms, pbrDefaultDefines } from '../const/defaultParams';
 
 class PBRMaterial extends THREE.ShaderMaterial {
-	constructor(mesh, uniformsOpt) {
+	constructor(mesh, environment, uniformsOpt) {
 		let sourceMaterial = mesh.material;
 		super();
 		this.modelNormalMatrix = new THREE.Matrix3();
 		this.copy(sourceMaterial);
-		
+
 		this.defines = Object.assign({}, pbrDefaultDefines);
 		// VertexTangents rely on (vertexTangents && normalMap) in threejs
 		// if(this.vertexTangents) this.defines.USE_TANGENT = 1;
 		// Copy method no include normalMapType
 		this.normalMapType = sourceMaterial.normalMapType;
-		
+
 		// Uniforms
 		let UniformsLib = THREE.UniformsLib;
 		this.uniforms = THREE.UniformsUtils.merge([
@@ -34,11 +34,8 @@ class PBRMaterial extends THREE.ShaderMaterial {
 			pbrDefaultUniforms
 		]);
 		this.uniforms['uShadowDepthRange'] = { value: uniformsOpt.shadowDepthRange };
-		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: uniformsOpt.uEnvironmentSphericalHarmonics };
-		this.uniforms['uEnvironmentLodRange'] = { value: uniformsOpt.uEnvironmentLodRange };
-		this.uniforms['uEnvironmentSize'] = { value: uniformsOpt.uEnvironmentSize };
-		this.uniforms['uIntegrateBRDF'] = { value: uniformsOpt.uIntegrateBRDF };
 		this.uniforms['uModelNormalMatrix'] = { value: this.modelNormalMatrix };
+		this.syncEnvSetting(environment);
 
 		// PBR param sync
 		this.syncParam(sourceMaterial);
@@ -48,12 +45,32 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		this.lights = true;
 
 		// Other
-		if(sourceMaterial.isGLTFSpecularGlossinessMaterial === true) this.initSGWorkflow(sourceMaterial);
-		if(uniformsOpt.isMobile) this.defines.MOBILE = 1;
+		if (sourceMaterial.isGLTFSpecularGlossinessMaterial === true) this.initSGWorkflow(sourceMaterial);
 
 		// Sync worldNormal matrix
 		mesh.onBeforeRender = () => {
 			this.modelNormalMatrix.getNormalMatrix(mesh.matrixWorld);
+		};
+
+		this.needsUpdate = true;
+	}
+
+	syncEnvSetting(environment) {
+		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: environment.uEnvironmentSphericalHarmonics };
+		if (environment.textureLODSupport) {
+			// CubeMap
+			let { cubeMapEnv, uEnvironmentLodRange, uEnvironmentSize } = environment;
+			this.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
+			this.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };
+			this.envMap = cubeMapEnv.cubeTexture;
+			this.uniforms['envMap'] = { value: cubeMapEnv.cubeTexture };
+		} else {
+			// Panorama
+		}
+		if (environment.isMobile) {
+			this.defines.MOBILE = 1;
+		} else {
+			this.uniforms['uIntegrateBRDF'] = { value: environment.uIntegrateBRDF };
 		}
 	}
 
@@ -75,15 +92,15 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		this.uniforms.diffuse.value = sourceMaterial.color || new Color(0xffffff);
 	}
 
-	initSGWorkflow(sourceMaterial){
+	initSGWorkflow(sourceMaterial) {
 		console.log('SpecularGlossinessMaterial');
 		this.defines[`SPECULAR_GLOSSINESS`] = 1;
 		let { specular, glossiness, specularMap, glossinessMap } = sourceMaterial._extraUniforms;
-		if(specularMap.value){
+		if (specularMap.value) {
 			this.defines[`USE_SPECULARMAP`] = 1;
 			this.uniforms[`specularMap`] = specularMap;
 		}
-		if(glossinessMap.value){
+		if (glossinessMap.value) {
 			this.defines[`USE_GLOSSINESSMAP`] = 1;
 			this.uniforms[`glossinessMap`] = glossinessMap;
 		}

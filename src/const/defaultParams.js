@@ -10,7 +10,6 @@ const syncMapArr = [
 	'aoMap',
 	'emissiveMap',
 	'displacementmap',
-	'envMap'
 ];
 
 const syncUniformArr = [

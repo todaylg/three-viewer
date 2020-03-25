@@ -2,35 +2,26 @@
 
 import * as THREE from 'three';
 import EnvironmentCubeMap from './EnvironmentCubeMap';
+import EnvironmentPanorama from './EnvironmentPanorama';
 import IntegrateBRDFMap from './IntegrateBRDFMap';
 import EnvironmentSphericalHarmonics from './EnvironmentSphericalHarmonics';
 import fileHelper from './fileHelper';
 
 class Environment {
-	constructor() {
+	constructor(viewer) {
+		let { renderer, isMobile } = viewer;
+		this.isMobile = isMobile;
 		this._config = undefined;
 		this._files = {};
+		let ctx = renderer.context;
+		this.textureLODSupport = ctx.getExtension('EXT_shader_texture_lod');
 	}
 
-	async loadPackage(urlOfFile) {
-		let filesMap = await fileHelper.unzip(urlOfFile);
-		return this.readZipContent(filesMap, urlOfFile);
-	}
-
-	readZipContent(filesMap, url) {
-		const envName = url
-			.split('/')
-			.pop()
-			.split('.zip')[0];
-		this.name = envName;
-
-		for (let filename in filesMap) {
-			let data = filesMap[filename];
-			let name = filename.split('/').pop();
-			this._files[name] = data;
-		}
-
-		return this.init(this._files['config.json']);
+	async loadPackage(url) {
+		this.url = url;
+		const configSrc = `${url}config.json`;
+		let config = await fileHelper.requestResource(configSrc);
+		return await this.init(config);
 	}
 
 	getImage(type, encoding, format) {
@@ -51,39 +42,48 @@ class Environment {
 		return results;
 	}
 
-	init(config) {
-		// LUV format only
-		// Todo: More format
+	async init(config) {
+		// LUV format only (Todo: Support More format)
 		this._config = config;
 
-		// Todo: Panorama
+		if(this.textureLODSupport){
+			// CubeMap
+			let cubeMapTextureData = this.getImage('specular_ue4', 'luv', 'cubemap');
+			let cubeMapFile = cubeMapTextureData.file;
+			let cubeMapSize = cubeMapTextureData.width;
+			let cubeMapData = await fileHelper.requestResource(`${this.url}${cubeMapFile}`);
+			this.cubeMapEnv = new EnvironmentCubeMap(cubeMapData, cubeMapSize, config);
+			this.cubeMapEnv.loadPacked();
+			let minTextureSize = cubeMapTextureData.limitSize;
+			let nbLod = Math.log(cubeMapSize) / Math.LN2;
+			let maxLod = nbLod - Math.log(minTextureSize) / Math.LN2;
+			this.uEnvironmentLodRange = [nbLod, maxLod];
+			this.uEnvironmentSize = [cubeMapSize, cubeMapSize];
+		}else{
+			// Panorama
+			let panoramaTextureData = this.getImage('specular_ue4', 'luv', 'panorama');
+			let panoramaFile = panoramaTextureData.file;
+			let panoramaSize = panoramaTextureData.width;
+			let panoramaData = await fileHelper.requestResource(`${this.url}${panoramaFile}`);
+			this.panoramaEnv = new EnvironmentPanorama(panoramaData, panoramaSize, config);
+			this.panoramaEnv.loadPacked();
+		}
 
-		// CubeMap
-		let cubeMapTextureData = this.getImage('specular_ue4', 'luv', 'cubemap');
-		let cubeMapFile = cubeMapTextureData.file;
-		let cubeMapSize = cubeMapTextureData.width;
-		let cubeMapData = this._files[cubeMapFile];
-		this.cubeMapEnv = new EnvironmentCubeMap(cubeMapData, cubeMapSize, config);
-		this.cubeMapEnv.loadPacked();
-		let minTextureSize = cubeMapTextureData.limitSize;
-		let nbLod = Math.log(cubeMapSize) / Math.LN2;
-        let maxLod = nbLod - Math.log(minTextureSize) / Math.LN2;
-		this.uEnvironmentLodRange = [nbLod, maxLod];
-		this.uEnvironmentSize = [cubeMapSize, cubeMapSize];
-
-		// LUT
-		let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');
-		let lutFile = lutTextureData.file;
-		let lutSize = lutTextureData.width;
-		let lutData = this._files[lutFile];
-		this._integrateBRDF = new IntegrateBRDFMap(lutData, lutSize);
-		this.uIntegrateBRDF = this._integrateBRDF.loadPacked();
+		if(!this.isMobile){
+			// LUT
+			let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');
+			let lutFile = lutTextureData.file;
+			let lutSize = lutTextureData.width;
+			let lutData = await fileHelper.requestResource(`${this.url}${lutFile}`);
+			this._integrateBRDF = new IntegrateBRDFMap(lutData, lutSize);
+			this.uIntegrateBRDF = this._integrateBRDF.loadPacked();
+		}
 
 		// Background
 		let bgTextureData = this.getImage('background', 'luv', 'cubemap');
 		let bgFile = bgTextureData.file;
 		let bgSize = bgTextureData.width;
-		let bgData = this._files[bgFile];
+		let bgData = await fileHelper.requestResource(`${this.url}${bgFile}`);
 		this.backgroundEnv = new EnvironmentCubeMap(bgData, bgSize, {
 			minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter

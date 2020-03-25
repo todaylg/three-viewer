@@ -47,8 +47,8 @@ export default class ModelViewer {
 	}
 
 	loadEnvMap(envMapName = envMapList[0]) {
-		const envMapSrc = `${envMapPath}${envMapName}.zip`;
-		return new Environment().loadPackage(envMapSrc);
+		const envMapSrc = `${envMapPath}${envMapName}/`;
+		return new Environment(this).loadPackage(envMapSrc);
 	}
 
 	loadSunLight(sunlightInfo) {
@@ -109,16 +109,11 @@ export default class ModelViewer {
 	async initScene() {
 		let environment = await this.loadEnvMap();
 		let {
-			cubeMapEnv,
 			backgroundEnv,
-			uEnvironmentSphericalHarmonics,
-			uEnvironmentLodRange,
-			uEnvironmentSize,
 			uBGEnvironmentSize,
-			uIntegrateBRDF,
 			sunlightInfo
 		} = environment;
-		let { scene, camera } = this;
+		let { scene } = this;
 
 		this.loadSunLight(sunlightInfo);
 		this.loadBackground(backgroundEnv, uBGEnvironmentSize);
@@ -135,14 +130,8 @@ export default class ModelViewer {
 		// Replace PBR Material
 		gltfScene.traverse(child => {
 			if (child.isMesh) {
-				child.material.envMap = cubeMapEnv.cubeTexture;
-				child.material = new PBRMaterial(child, {
-					isMobile: this.isMobile,
+				child.material = new PBRMaterial(child, environment, {
 					shadowDepthRange,
-					uEnvironmentSphericalHarmonics,
-					uEnvironmentLodRange,
-					uEnvironmentSize,
-					uIntegrateBRDF
 				});
 				child.material.uniforms.uEnvironmentTransform = this.envRotationMat;
 				child.material.uniforms.uEnvBrightness = this.envBrightness;
@@ -302,12 +291,16 @@ export default class ModelViewer {
 		});
 	}
 
-	getDefinesFromGUI() {
-		let defines = {};
+	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
+		// Clean
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/g;
+		Object.keys(defines).map(key => {
+			if(reg.test(key)) delete defines[key];
+		});
+		// Reset
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
-
 		defines[`DIFFUSE_${guiParams.diffuseEquation.toUpperCase()}`] = 1;
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;
@@ -317,10 +310,9 @@ export default class ModelViewer {
 	}
 
 	reCompileShader(updateBG) {
-		let defines = this.getDefinesFromGUI();
 		this.gltfScene.traverse(child => {
 			if (child.isMesh && child.material) {
-				child.material.defines = defines;
+				this.setDefinesFromGUI(child.material.defines);
 				child.material.needsUpdate = true;
 			}
 		});

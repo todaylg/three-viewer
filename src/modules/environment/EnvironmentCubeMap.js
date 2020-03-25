@@ -85,7 +85,7 @@ export default class CubeMapEnv {
 			
 			// Get per face data	
 			for (let face = 0; face < 6; face++) {
-				var dataTexture = new THREE.DataTexture(packedImages[face][mip], size, size, THREE.RGBAFormat);
+				let dataTexture = new THREE.DataTexture(packedImages[face][mip], size, size, THREE.RGBAFormat);
 				dataTexture.format = cubeTexture.format;
 				dataTexture.encoding = textureEncoding;
 				dataTexture.type = cubeTexture.type;

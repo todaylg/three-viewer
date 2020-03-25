@@ -46,29 +46,25 @@ class Environment {
 		// LUV format only (Todo: Support More format)
 		this._config = config;
 
-		if(this.textureLODSupport){
-			// CubeMap
-			let cubeMapTextureData = this.getImage('specular_ue4', 'luv', 'cubemap');
-			let cubeMapFile = cubeMapTextureData.file;
-			let cubeMapSize = cubeMapTextureData.width;
-			let cubeMapData = await fileHelper.requestResource(`${this.url}${cubeMapFile}`);
-			this.cubeMapEnv = new EnvironmentCubeMap(cubeMapData, cubeMapSize, config);
-			this.cubeMapEnv.loadPacked();
-			let minTextureSize = cubeMapTextureData.limitSize;
-			let nbLod = Math.log(cubeMapSize) / Math.LN2;
-			let maxLod = nbLod - Math.log(minTextureSize) / Math.LN2;
-			this.uEnvironmentLodRange = [nbLod, maxLod];
-			this.uEnvironmentSize = [cubeMapSize, cubeMapSize];
-		}else{
-			// Panorama
-			let panoramaTextureData = this.getImage('specular_ue4', 'luv', 'panorama');
-			let panoramaFile = panoramaTextureData.file;
-			let panoramaSize = panoramaTextureData.width;
-			let panoramaData = await fileHelper.requestResource(`${this.url}${panoramaFile}`);
-			this.panoramaEnv = new EnvironmentPanorama(panoramaData, panoramaSize, config);
-			this.panoramaEnv.loadPacked();
-		}
+		let envMapFormat = 'panorama';
+		if(this.textureLODSupport) envMapFormat = 'cubemap';
 
+		let textureData = this.getImage('specular_ue4', 'luv', envMapFormat);
+		let mapFile = textureData.file;
+		let mapSize = textureData.width;
+		let mapData = await fileHelper.requestResource(`${this.url}${mapFile}`);
+		if(envMapFormat === 'cubemap'){
+			this.mapEnv = new EnvironmentCubeMap(mapData, mapSize, config);
+		}else{
+			this.mapEnv = new EnvironmentPanorama(mapData, mapSize, config);
+		}
+		this.mapEnv.loadPacked();
+		let minTextureSize = textureData.limitSize;
+		let nbLod = Math.log(mapSize) / Math.LN2;
+		let maxLod = nbLod - Math.log(minTextureSize) / Math.LN2;
+		this.uEnvironmentLodRange = [nbLod, maxLod];
+		this.uEnvironmentSize = [mapSize, mapSize];
+		
 		if(!this.isMobile){
 			// LUT
 			let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');

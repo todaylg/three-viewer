@@ -56,19 +56,25 @@ class PBRMaterial extends THREE.ShaderMaterial {
 	}
 
 	syncEnvSetting(environment) {
-		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: environment.uEnvironmentSphericalHarmonics };
-		if (environment.textureLODSupport) {
+		let { mapEnv, uEnvironmentSphericalHarmonics, uEnvironmentLodRange, uEnvironmentSize, textureLODSupport } = environment;
+		if (textureLODSupport) {
+			this.defines[`CUBEMAP_LOD`] = 1;
 			// CubeMap
-			let { cubeMapEnv, uEnvironmentLodRange, uEnvironmentSize } = environment;
-			this.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
-			this.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };
-			this.envMap = cubeMapEnv.cubeTexture;
-			this.uniforms['envMap'] = { value: cubeMapEnv.cubeTexture };
+			this.envMap = mapEnv.cubeTexture;
+			this.uniforms['envMap'] = { value: mapEnv.cubeTexture };
 		} else {
 			// Panorama
+			this.defines[`PANORAMA`] = 1;
+			this.envMap = mapEnv.texture;
+			this.uniforms['envMap'] = { value: mapEnv.texture };
 		}
+		// Common
+		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: uEnvironmentSphericalHarmonics };
+		this.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
+		this.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };
+		// Mobile optimize
 		if (environment.isMobile) {
-			this.defines.MOBILE = 1;
+			this.defines[`MOBILE`] = 1;
 		} else {
 			this.uniforms['uIntegrateBRDF'] = { value: environment.uIntegrateBRDF };
 		}

@@ -6,8 +6,7 @@ uniform mat4 uEnvironmentTransform;
 mat3 environmentTransform;
 uniform float uEnvBrightness;
 uniform vec3 uEnvironmentSphericalHarmonics[9];
-uniform vec2 uEnvironmentSize;
-uniform vec2 uEnvironmentLodRange;
+
 uniform int uSpecularPeak;
 uniform int uOcclusionHorizon;
 uniform sampler2D uIntegrateBRDF;
@@ -18,10 +17,18 @@ uniform float roughness;
 uniform float metalness;
 uniform float opacity;
 
-uniform samplerCube envMap;
 uniform vec2 uShadowDepthRange;
 
 varying vec3 vViewPosition;
+
+#ifdef CUBEMAP_LOD
+uniform samplerCube envMap;
+#endif
+#ifdef PANORAMA
+uniform sampler2D envMap;
+#endif
+uniform vec2 uEnvironmentSize;
+uniform vec2 uEnvironmentLodRange;
 
 #ifdef SPECULAR_GLOSSINESS
     uniform vec3 specularFactor;
@@ -268,6 +275,10 @@ mat3 getEnvironmentTransfrom(mat4 transform) {
 
 #pragma glslify: computeDiffuseSPH = require(./chunk/computeDiffuseSPH.glsl);
 
+#ifdef PANORAMA
+    #pragma glslify: texturePanoramaLod = require(./chunk/panoramaSampler.glsl);
+#endif
+
 #ifdef MOBILE
     #pragma glslify: integrateBRDF = require(./chunk/integrateBRDFMobile.glsl);
 #else
@@ -286,10 +297,11 @@ float linRoughnessToMipmap(float roughnessLinear){
     return sqrt(roughnessLinear);
 }
 
-vec3 prefilterEnvMapCube(const in float rLinear, const in vec3 R) {
+vec3 prefilterEnvMap(const in float rLinear, const in vec3 R) {
     vec3 dir = R;
-    float lod = linRoughnessToMipmap(rLinear) * uEnvironmentLodRange[1]; //( uEnvironmentMaxLod - 1.0 );
-    lod = min( uEnvironmentLodRange[0], lod );
+    float lod = linRoughnessToMipmap(rLinear) * uEnvironmentLodRange[1]; //(uEnvironmentMaxLod - 1.0);
+    lod = min(uEnvironmentLodRange[0], lod);
+#ifdef CUBEMAP_LOD
     // http://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering/
     float scale = 1.0 - exp2(lod) / uEnvironmentSize[0];
     vec3 absDir = abs(dir);
@@ -298,12 +310,11 @@ vec3 prefilterEnvMapCube(const in float rLinear, const in vec3 R) {
     if (absDir.x != M) dir.x *= scale;
     if (absDir.y != M) dir.y *= scale;
     if (absDir.z != M) dir.z *= scale;
+	return LogLuvToLinear(textureCubeLodEXT(envMap, dir, lod)).rgb;
+#else
+    return LogLuvToLinear(texturePanoramaLod(envMap, uEnvironmentSize, R, lod, uEnvironmentLodRange[0])).rgb;
+	#endif
 
-    // #ifdef TEXTURE_LOD_EXT
-		return LogLuvToLinear(textureCubeLodEXT(envMap, dir, lod)).rgb;
-	// #else
-        // ToFix: Some mobie no support TEXTURE_LOD_EXT
-	// #endif
 }
 
 // From Sebastien Lagarde Moving Frostbite to PBR page 69
@@ -324,7 +335,7 @@ vec3 getPrefilteredEnvMapColor(const in vec3 normal, const in vec3 viewDir, cons
     // so roughness = linRoughness * linRoughness
     R = getSpecularDominantDir(normal, R, roughness);
 
-    vec3 prefilteredColor = prefilterEnvMapCube(roughness, environmentTransform * R);
+    vec3 prefilteredColor = prefilterEnvMap(roughness, environmentTransform * R);
 
     float factor = clamp(1.0 + dot(R, frontNormal), 0.0, 1.0);
     prefilteredColor *= factor * factor;

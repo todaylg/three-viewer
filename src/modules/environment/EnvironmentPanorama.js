@@ -1,12 +1,16 @@
 import * as THREE from 'three';
 import { isGunzipBuffer, gunzip } from './zlib';
 
-// Todo
 export default class PanoramaEnv {
 	constructor(data, size, options) {
 		this._options = options || {};
 		this._size = size;
 		this._data = data;
+		this._texture = null;
+	}
+
+	get texture() {
+		return this._texture;
 	}
 
 	// Convert to RGBA Buffer
@@ -38,11 +42,12 @@ export default class PanoramaEnv {
 			imageData = deinterleave;
 
 			let dataTexture = new THREE.DataTexture(imageData, size, size, THREE.RGBAFormat);
-            dataTexture.encoding = THREE.LogLuvEncoding;
-            dataTexture.flipY = true;
-            dataTexture.needsUpdate = true;
+			dataTexture.encoding = THREE.LogLuvEncoding;
+			dataTexture.flipY = true;
+			dataTexture.needsUpdate = true;
+			this._texture = dataTexture;
 		};
 
 		return readInputArray(this._data);
-    }
+	}
 }

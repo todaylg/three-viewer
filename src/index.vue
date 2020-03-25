@@ -42,10 +42,7 @@ export default {
 		};
 	},
 	mounted() {
-		// this.initEvent();
-		// Dev:
-		document.querySelector("#wrapper").classList.remove("isLoading");
-		this.loadDefaultMode();
+		this.initEvent();
 	},
 	methods: {
 		initScene(gltf) {
@@ -140,6 +137,7 @@ body {
 		bottom: 5%;
 		border: 3px dashed #e6e6e6;
 		color: #cccccc;
+		text-align: center;
 	}
 	.innerArea{
 		width: 100%;

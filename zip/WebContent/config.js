@@ -1,1 +1,0 @@
-zip.workerScriptsPath = './zip/WebContent/';

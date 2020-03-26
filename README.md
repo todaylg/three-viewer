@@ -49,6 +49,8 @@ npm run build
 ### Todo
 
 - [x] Specular Glossiness Material
+
+- [x] Panorama EnvMap(For the devices that dont support lod)
   
 - [ ] Anisotropy(GGX)
 

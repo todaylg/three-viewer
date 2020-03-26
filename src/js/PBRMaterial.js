@@ -58,17 +58,15 @@ class PBRMaterial extends THREE.ShaderMaterial {
 	syncEnvSetting(environment) {
 		let { mapEnv, uEnvironmentSphericalHarmonics, uEnvironmentLodRange, uEnvironmentSize, textureLODSupport } = environment;
 		if (textureLODSupport) {
-			this.defines[`CUBEMAP_LOD`] = 1;
 			// CubeMap
-			this.envMap = mapEnv.cubeTexture;
-			this.uniforms['envMap'] = { value: mapEnv.cubeTexture };
+			this.defines[`CUBEMAP_LOD`] = 1;
 		} else {
 			// Panorama
 			this.defines[`PANORAMA`] = 1;
-			this.envMap = mapEnv.texture;
-			this.uniforms['envMap'] = { value: mapEnv.texture };
 		}
 		// Common
+		this.envMap = mapEnv.texture;
+		this.uniforms['envMap'] = { value: mapEnv.texture };
 		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: uEnvironmentSphericalHarmonics };
 		this.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
 		this.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };

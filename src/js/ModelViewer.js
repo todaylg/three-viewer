@@ -62,7 +62,7 @@ export default class ModelViewer {
 		if (!this.background) {
 			this.background = new Background(
 				{
-					envMap: backgroundEnv.cubeTexture,
+					envMap: backgroundEnv.texture,
 					uBGEnvironmentSize,
 					uEnvBrightness: this.envBrightness,
 					debug: this.debug
@@ -72,7 +72,7 @@ export default class ModelViewer {
 			this.background.material.uniforms.uEnvironmentTransform = this.envRotationMat;
 		} else {
 			// Update new background
-			this.background.material.uniforms.envMap.value = backgroundEnv.cubeTexture;
+			this.background.material.uniforms.envMap.value = backgroundEnv.texture;
 			this.background.material.uniforms.uEnvironmentSize.value = uBGEnvironmentSize;
 		}
 	}
@@ -80,7 +80,7 @@ export default class ModelViewer {
 	async updateEnvMap(envMapName, callBack) {
 		let environment = await this.loadEnvMap(envMapName);
 		let {
-			cubeMapEnv,
+			mapEnv,
 			backgroundEnv,
 			uEnvironmentSphericalHarmonics,
 			uEnvironmentLodRange,
@@ -96,7 +96,7 @@ export default class ModelViewer {
 		// Sync new envmap param
 		this.gltfScene.traverse(child => {
 			if (child.isMesh) {
-				child.material.uniforms.envMap.value = cubeMapEnv.cubeTexture;
+				child.material.uniforms.envMap.value = mapEnv.texture;
 				child.material.uniforms['uEnvironmentSphericalHarmonics'] = { value: uEnvironmentSphericalHarmonics };
 				child.material.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
 				child.material.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };

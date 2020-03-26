@@ -2,15 +2,15 @@ const envMapPath = './assets/envMap/';
 
 const envMapList = [
     'Arches',
+    'Alexs',
 	'GCanyon',
 	'Industrial',
-    'Milkyway',
+	'Milkyway',
+	'Outside',
 	'PaperMill',
 	'Royal',
-    'Venice',
     'TropicalRuins',
-    'Alexs',
-    'Pedestrian'
+    'Venice',
 ];
 
 const diffuseEquation = [

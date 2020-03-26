@@ -97,20 +97,20 @@ export default class CubeMapEnv {
 			size = size / 2;
 		}
 		// Integrate
-		this.cubeTexture = new THREE.CubeTexture();
-        this.cubeTexture.format = THREE.RGBAFormat;
-        this.cubeTexture.encoding = textureEncoding;
-        this.cubeTexture.minFilter = this._options.minFilter || THREE.LinearMipMapLinearFilter;
-        this.cubeTexture.magFilter = this._options.magFilter || THREE.LinearFilter;
-        this.cubeTexture.generateMipmaps = false;
+		this.texture = new THREE.CubeTexture();
+        this.texture.format = THREE.RGBAFormat;
+        this.texture.encoding = textureEncoding;
+        this.texture.minFilter = this._options.minFilter || THREE.LinearMipMapLinearFilter;
+        this.texture.magFilter = this._options.magFilter || THREE.LinearFilter;
+        this.texture.generateMipmaps = false;
         
         for(let i = 0; i < 6; i ++) {
-            this.cubeTexture.image[i] = this.cubeTextures[0].images[i];
+            this.texture.image[i] = this.cubeTextures[0].images[i];
             for( let m = 1; m < numMips; m++ ) {
-                this.cubeTexture.mipmaps[m-1] = this.cubeTextures[m];
+                this.texture.mipmaps[m-1] = this.cubeTextures[m];
                 this.cubeTextures[m].needsUpdate = true;
             }
         }
-		this.cubeTexture.needsUpdate = true;
+		this.texture.needsUpdate = true;
     }
 }

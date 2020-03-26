@@ -1,5 +1,4 @@
 import requestFile from './requestFile.js';
-const zip = window.zip;
 
 let mimeTypes = new Map();
 
@@ -157,80 +156,6 @@ var fileHelper = {
 		return Promise.all(promises).then(function() {
 			return filesMap;
 		});
-	},
-
-	_unzipEntry: function(entry) {
-		return new Promise(function(resolve) {
-			var filename = entry.filename;
-			var extension = fileHelper.getExtension(filename);
-			var mimetype = fileHelper.getMimeType(extension);
-
-			var Writer = zip.BlobWriter;
-			if (mimetype.match('text') !== null || mimetype.match('json') !== null) Writer = zip.TextWriter;
-			// get data from the first file
-			entry.getData(new Writer(mimetype), function(data) {
-				resolve({
-					filename: filename,
-					data: data
-				});
-			});
-		});
-	},
-
-	unzipBlob: function(blob) {
-		return new Promise(function(resolve, reject) {
-			// use a zip.BlobReader object to read zipped data stored into blob variable
-			var filesMap = {};
-			var filePromises = [];
-			zip.createReader(
-				new zip.BlobReader(blob),
-				function(zipReader) {
-					// get entries from the zip file
-					zipReader.getEntries(function(entries) {
-						for (var i = 0; i < entries.length; i++) {
-							if (entries[i].directory) continue;
-
-							var promise = fileHelper._unzipEntry(entries[i]);
-							promise.then(function(result) {
-								filesMap[result.filename] = result.data;
-							});
-							filePromises.push(promise);
-						}
-
-						Promise.all(filePromises).then(function() {
-							zipReader.close();
-							fileHelper.resolveFilesMap(filesMap).then(function(filesMapResolved) {
-								resolve(filesMapResolved);
-							});
-						});
-					});
-				},
-				function() {
-					reject(this);
-				}
-			);
-		});
-	},
-
-	unzip: function(input) {
-		if (!zip) return Promise.reject('missing deps to unzip, require https://github.com/gildas-lormeau/zip.js');
-
-		if (isString(input)) {
-			return fileHelper.requestResource(input).then(function(arrayBuffer) {
-				var blob = new Blob([arrayBuffer], {
-					type: mimeTypes.get('zip')
-				});
-				return fileHelper.unzipBlob(blob);
-			});
-		} else if (input instanceof Blob) {
-			return fileHelper.unzipBlob(input);
-		} else if (input instanceof ArrayBuffer) {
-			var blob = new Blob([input], {
-				type: mimeTypes.get('zip')
-			});
-			return fileHelper.unzipBlob(blob);
-		}
-		return Promise.reject('cant unzip input');
 	},
 
 	getMimeType: function(extension) {

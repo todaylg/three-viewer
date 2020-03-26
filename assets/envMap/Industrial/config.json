@@ -1,0 +1,182 @@
+{
+    "Lights": [
+        {
+            "area": {
+                "h": 0.0703125, 
+                "w": 0.0791016, 
+                "x": 0.612793, 
+                "y": 0.317383
+            }, 
+            "color": [
+                0.868521, 
+                0.867889, 
+                0.879098
+            ], 
+            "direction": [
+                -0.546642, 
+                -0.542751, 
+                0.637655
+            ], 
+            "error": 0, 
+            "lum_ratio": 0.0289818, 
+            "luminosity": 14.5429, 
+            "sum": 0.0644918, 
+            "variance": 6.96464e-07
+        }
+    ], 
+    "diffuseSPH": [
+        0.631923, 
+        0.627099, 
+        0.62355, 
+        -0.0993287, 
+        -0.104961, 
+        -0.106206, 
+        0.0826963, 
+        0.0761815, 
+        0.0749436, 
+        -0.0136042, 
+        -0.0102947, 
+        -0.00933793, 
+        -0.0135529, 
+        -0.0135176, 
+        -0.0133104, 
+        -0.011981, 
+        -0.013042, 
+        -0.0130195, 
+        -0.00873996, 
+        -0.00973026, 
+        -0.0104545, 
+        0.0102242, 
+        0.0126836, 
+        0.0145013, 
+        0.00304703, 
+        0.00551263, 
+        0.00910386, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        -0.00189456, 
+        -0.00188685, 
+        -0.00191369, 
+        -0.00119449, 
+        -0.000998461, 
+        -0.000879466, 
+        0.000721869, 
+        0.000501618, 
+        0.00043288, 
+        0.000999924, 
+        0.00116401, 
+        0.0013396, 
+        0.00115641, 
+        0.00106797, 
+        0.00100134, 
+        0.000109545, 
+        -2.99942e-05, 
+        -0.000129092, 
+        0.00280054, 
+        0.00272934, 
+        0.00265302, 
+        0.00176745, 
+        0.00180303, 
+        0.00190056, 
+        0.00268551, 
+        0.00245186, 
+        0.0022482
+    ], 
+    "textures": [
+        {
+            "encoding": "srgb", 
+            "format": "panorama", 
+            "images": [
+                {
+                    "file": "thumbnail_256.jpg", 
+                    "height": 128, 
+                    "width": 256
+                }
+            ], 
+            "type": "thumbnail"
+        }, 
+        {
+            "encoding": "luv", 
+            "format": "cubemap", 
+            "images": [
+                {
+                    "blur": 0.1, 
+                    "file": "background_cubemap_256_0.1_luv.bin.gz", 
+                    "height": 256, 
+                    "samples": 4096, 
+                    "sizeCompressed": 362924, 
+                    "sizeUncompressed": 1572864, 
+                    "width": 256
+                }
+            ], 
+            "type": "background"
+        }, 
+        {
+            "encoding": "luv", 
+            "format": "panorama", 
+            "images": [
+                {
+                    "file": "specular_panorama_ue4_1024_luv.bin.gz", 
+                    "height": 1024, 
+                    "samples": 1024, 
+                    "sizeCompressed": 834565, 
+                    "sizeUncompressed": 4194304, 
+                    "width": 1024
+                }
+            ], 
+            "limitSize": 32, 
+            "type": "specular_ue4"
+        }, 
+        {
+            "encoding": "luv", 
+            "format": "cubemap", 
+            "images": [
+                {
+                    "file": "specular_cubemap_ue4_256_luv.bin.gz", 
+                    "height": 256, 
+                    "samples": 1024, 
+                    "sizeCompressed": 750897, 
+                    "sizeUncompressed": 2097144, 
+                    "width": 256
+                }
+            ], 
+            "limitSize": 8, 
+            "type": "specular_ue4"
+        }, 
+        {
+            "encoding": "rg16", 
+            "format": "lut", 
+            "images": [
+                {
+                    "file": "brdf_ue4.bin.gz", 
+                    "height": 128, 
+                    "samples": 1024, 
+                    "sizeCompressed": 59665, 
+                    "sizeUncompressed": 65536, 
+                    "width": 128
+                }
+            ], 
+            "type": "brdf_ue4"
+        }
+    ], 
+    "writeByChannel": true
+}

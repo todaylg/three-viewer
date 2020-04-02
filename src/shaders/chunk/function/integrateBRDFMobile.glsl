@@ -7,5 +7,3 @@ vec3 integrateBRDF(vec3 specular, float roughness, float NoV, float f90) {
     vec2 AB = vec2(-1.04, 1.04) * a004 + r.zw;
     return specular * AB.x + AB.y * f90;
 }
-
-#pragma glslify: export(integrateBRDF)

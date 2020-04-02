@@ -15,5 +15,3 @@ vec3 computeDiffuseSPH(vec3 normal, vec3 sphericalHarmonics[9]){
     );
     return max(result, vec3(0.0));
 }
-
-#pragma glslify: export(computeDiffuseSPH)

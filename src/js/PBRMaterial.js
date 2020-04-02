@@ -1,10 +1,8 @@
 import * as THREE from 'three';
-import pbrVS from '../shaders/pbrVS';
-import pbrFS from '../shaders/pbrFS';
 import { syncMapArr, syncUniformArr, pbrDefaultUniforms, pbrDefaultDefines } from '../const/defaultParams';
 
 class PBRMaterial extends THREE.ShaderMaterial {
-	constructor(mesh, environment, uniformsOpt) {
+	constructor(mesh, environment, shaderData) {
 		let sourceMaterial = mesh.material;
 		super();
 		this.modelNormalMatrix = new THREE.Matrix3();
@@ -33,15 +31,15 @@ class PBRMaterial extends THREE.ShaderMaterial {
 			UniformsLib.lights,
 			pbrDefaultUniforms
 		]);
-		this.uniforms['uShadowDepthRange'] = { value: uniformsOpt.shadowDepthRange };
+		this.uniforms['uShadowDepthRange'] = { value: shaderData.shadowDepthRange };
 		this.uniforms['uModelNormalMatrix'] = { value: this.modelNormalMatrix };
 		this.syncEnvSetting(environment);
 
 		// PBR param sync
 		this.syncParam(sourceMaterial);
 
-		this.vertexShader = pbrVS;
-		this.fragmentShader = pbrFS;
+		this.vertexShader = shaderData.pbrVS;
+		this.fragmentShader = shaderData.pbrFS;
 		this.lights = true;
 
 		// Other

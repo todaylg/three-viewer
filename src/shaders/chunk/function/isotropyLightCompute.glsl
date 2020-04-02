@@ -1,5 +1,3 @@
-#pragma glslify: pow5 = require(../math/pow5.glsl);
-
 // ************************************ Specular ************************************
 // ************************ Normal Distribution Functions(NDF) **************************
 
@@ -208,7 +206,7 @@ vec3 diffuseCompute(vec3 precomputeLight, vec3 diffuse, float NoL, float VoH){
 #endif
 }
 
-void computeLight(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomputeLight, in vec3 diffuse, in vec3 specular, in float attenuation, in vec3 lightColor, in vec3 lightDir, in float f90, out vec3 diffuseOut, out vec3 specularOut, out bool lighted) {
+void lightCompute(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomputeLight, in vec3 diffuse, in vec3 specular, in float attenuation, in vec3 lightColor, in vec3 lightDir, in float f90, out vec3 diffuseOut, out vec3 specularOut, out bool lighted) {
     lighted = NoL > 0.0;
     if (!lighted) {
         specularOut = diffuseOut = vec3(0.0);
@@ -222,5 +220,3 @@ void computeLight(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomp
     diffuseOut = colorAttenuate * diffuseCompute(precomputeLight, diffuse, NoL, VoH);
     specularOut = colorAttenuate * specularCompute(precomputeLight, specular, NoL, NoH, VoH, f90);
 }
-
-#pragma glslify: export(computeLight)

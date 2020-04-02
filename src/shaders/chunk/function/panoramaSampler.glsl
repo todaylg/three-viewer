@@ -48,5 +48,3 @@ vec4 texturePanoramaLod(const in sampler2D tex, const in vec2 size , const in ve
 
     return mix(texel0, texel1, fract(lod));
 }
-
-#pragma glslify: export(texturePanoramaLod)

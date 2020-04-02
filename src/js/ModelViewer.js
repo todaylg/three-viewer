@@ -5,6 +5,7 @@ import { OrbitControls } from 'LIB/threejs/controls/OrbitControls';
 import { Environment } from '../modules/environment/Environment';
 import { PBRMaterial } from './PBRMaterial';
 import { Background } from '../modules/background/Background';
+import Program from './Program';
 import {
 	envMapList,
 	envMapPath,
@@ -27,6 +28,7 @@ export default class ModelViewer {
 		this.gltfScene = gltf.scene;
 		this.time = 0;
 		this.debug = false;
+		this.program = new Program();
 		this.isMobile = isMobile();
 		// Env Rotation
 		this.envRotation = 0;
@@ -127,10 +129,16 @@ export default class ModelViewer {
 			this.sunLight.shadow.camera.near,
 			this.sunLight.shadow.camera.far
 		));
+
+		// Load Shader
+		let { pbrVS, pbrFS } = this.program.getPBRShader();
+
 		// Replace PBR Material
 		gltfScene.traverse(child => {
 			if (child.isMesh) {
 				child.material = new PBRMaterial(child, environment, {
+					pbrVS,
+					pbrFS,
 					shadowDepthRange,
 				});
 				child.material.uniforms.uEnvironmentTransform = this.envRotationMat;

@@ -10,12 +10,6 @@ module.exports = {
 			.loader('raw-loader')
 			.end();
 		config.module
-			.rule('glslify')
-			.test(/\.(glsl|fs|vs)$/)
-			.use('glslify-loader')
-			.loader('glslify-loader')
-			.end();
-		config.module
 			.rule('hdr')
 			.test(/\.hdr$/)
 			.use('url-loader')

@@ -13,7 +13,7 @@ class Environment {
 		this.isMobile = isMobile;
 		this._config = undefined;
 		this._files = {};
-		let ctx = renderer.context;
+		let ctx = renderer.getContext();
 		this.textureLODSupport = ctx.getExtension('EXT_shader_texture_lod');
 	}
 

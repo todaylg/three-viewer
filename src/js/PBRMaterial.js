@@ -95,7 +95,6 @@ class PBRMaterial extends THREE.ShaderMaterial {
 	}
 
 	initSGWorkflow(sourceMaterial) {
-		console.log('SpecularGlossinessMaterial');
 		this.defines[`SPECULAR_GLOSSINESS`] = 1;
 		let { specular, glossiness, specularMap, glossinessMap } = sourceMaterial._extraUniforms;
 		if (specularMap.value) {

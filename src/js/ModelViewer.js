@@ -302,9 +302,11 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/g;
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/;
 		Object.keys(defines).map(key => {
-			if(reg.test(key)) delete defines[key];
+			if(reg.test(key)){
+				delete defines[key];
+			}
 		});
 		// Reset
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
@@ -313,7 +315,6 @@ export default class ModelViewer {
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;
 		defines[`V_${guiParams.specularVisEquation.toUpperCase()}`] = 1;
-		
 		return defines;
 	}
 

@@ -141,14 +141,18 @@ void main(){
 
     #if NUM_DIR_LIGHTS > 0
         DirectionalLight directionalLight;
-        #pragma unroll_loop
+        #if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 0
+        DirectionalLightShadow directionalLightShadow;
+        #endif
+        #pragma unroll_loop_start
 	    for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
             directionalLight = directionalLights[ i ];
             precomputeDirect(normal, viewDir, directionalLight, attenuation, lightDir, NoL);
             lightCompute(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
             // Shadow
             #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
-            shadow *= all( bvec2( directionalLight.shadow, receiveShadow ) ) ? getShadow( lighted, directionalShadowMap[ i ], directionalLight.shadowMapSize, directionalLight.shadowBias, directionalLight.shadowRadius, vDirectionalShadowCoord[ i ], shadowDistance ) : 1.0;
+            directionalLightShadow = directionalLightShadows[ i ];
+            shadow *= all( bvec2( directionalLight.visible, receiveShadow ) ) ? getShadow( lighted, directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ], shadowDistance ) : 1.0;
             lightDiffuse *= shadow;
             lightSpecular *= shadow;
             #endif
@@ -156,31 +160,9 @@ void main(){
             resultLightDiffuse += lightDiffuse;
             resultLightSpecular += lightSpecular;
         }
+        #pragma unroll_loop_end
     #endif
-    #if NUM_SPOT_LIGHTS > 0
-        SpotLight spotLight;
-        #pragma unroll_loop
-	    for ( int i = 0; i < NUM_SPOT_LIGHTS; i ++ ) {
-            spotLight = spotLights[ i ];
-            precomputeSpot(normal, viewDir, vViewPosition, spotLight, attenuation, lightDir, NoL);
-            lightCompute(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, spotLight.color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
-            // TODO: Shadow && Anisotropy
-            resultLightDiffuse += lightDiffuse;
-            resultLightSpecular += lightSpecular;
-        }
-    #endif
-    #if NUM_POINT_LIGHTS > 0
-        PointLight pointLight;
-        #pragma unroll_loop
-	    for ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) {
-            pointLight = pointLights[ i ];
-            // TODO: Shadow && Anisotropy
-            precomputePoint(normal, viewDir, vViewPosition, pointLight, attenuation, lightDir, NoL);
-            lightCompute(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, pointLight.color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
-            resultLightDiffuse += lightDiffuse;
-            resultLightSpecular += lightSpecular;
-        }
-    #endif
+    // Todo: Spot/Point Light
 
     // Test
     #ifndef ENABLE_IBL

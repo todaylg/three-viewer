@@ -14,11 +14,11 @@ PBR rendering experiment of a single model, convenient comparison of rendering e
   
 - [x] Envtools-based IBL (Spherical Harmonics Lighting/Blur Background/Cube Envmap/Sunlight)
 
-- [x] Environment rotation
+- [x] Environment Rotation
 
-- [x] Direction/Spot/Point Light and Shadow
+- [x] Direction light And shadow
 
-- [x] Camera/ShadowCamera Adaptation model
+- [x] Camera/ShadowCamera Adaptation Model
 
 ## Usage
 
@@ -53,6 +53,8 @@ npm run build
 - [x] Panorama EnvMap(For the devices that dont support lod)
   
 - [ ] Anisotropy(GGX)
+  
+- [ ] Spot/Point Light and Shadow
 
 - [ ] Clearcoat
 

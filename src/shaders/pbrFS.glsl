@@ -66,7 +66,7 @@ varying vec3 vNormal;
 #preImport <light>
 #preImport <ibl>
 #preImport <brdf>
-#preImport <ao>
+#preImport <specularAO>
 
 void main(){
     vec3 viewDir = -normalize(vViewPosition);
@@ -182,5 +182,4 @@ void main(){
     gl_FragColor = LinearTosRGB(frag);
 
     #include <tonemapping_fragment>
-    #include <encodings_fragment>
 }

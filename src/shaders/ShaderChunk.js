@@ -9,7 +9,7 @@ import shadow from './chunk/shadow.glsl';
 import light from './chunk/light.glsl';
 import brdf from './chunk/brdf.glsl';
 import ibl from './chunk/ibl.glsl';
-import ao from './chunk/ao.glsl';
+import specularAO from './chunk/specularAO.glsl';
 
 export default {
 	computeDiffuseSPH,
@@ -23,5 +23,5 @@ export default {
 	light,
 	brdf,
 	ibl,
-	ao
+	specularAO
 };

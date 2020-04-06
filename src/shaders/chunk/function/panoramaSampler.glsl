@@ -1,5 +1,5 @@
 // For y up
-vec2 normalToPanoramaUV(const in vec3 dir){
+vec2 normalToPanoramaUV(vec3 dir){
     float n = length(dir.xz);
 
     // to avoid bleeding the max(-1.0,dir.x / n) is needed
@@ -19,7 +19,7 @@ vec2 normalToPanoramaUV(const in vec3 dir){
 }
 
 
-vec2 computeUVForMipmap(const in float level, const in vec2 uv, const in float size, const in float maxLOD){
+vec2 computeUVForMipmap(float level, vec2 uv, float size, float maxLOD){
     // width for level
     float widthForLevel = exp2( maxLOD-level);
 
@@ -34,7 +34,7 @@ vec2 computeUVForMipmap(const in float level, const in vec2 uv, const in float s
     return uvSpaceLocal * texelSize;
 }
 
-vec4 texturePanoramaLod(const in sampler2D tex, const in vec2 size , const in vec3 direction, const in float lod, const in float maxLOD){
+vec4 texturePanoramaLod(sampler2D tex, vec2 size , vec3 direction, float lod, float maxLOD){
     vec2 uvBase = normalToPanoramaUV(direction);
     // we scale down v here because it avoid to do twice in sub functions
     // uvBase.y *= 0.5;

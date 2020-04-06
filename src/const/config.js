@@ -40,6 +40,7 @@ const specularVisEquation = [
 	'Kelemen',
 	'Schlick',
 	'Smith',
+	'HammonApprox'
 ];
 
 const toneMappingList = [

@@ -9,7 +9,7 @@
 
 	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
 
-    void precomputeDirect(const in vec3 normal, const in vec3 viewDir,inout DirectionalLight directionalLight, out float attenuation, out vec3 lightDir, out float NoL) {
+    void precomputeDirect(vec3 normal, vec3 viewDir, inout DirectionalLight directionalLight, out float attenuation, out vec3 lightDir, out float NoL) {
         attenuation = 1.0;
         lightDir = directionalLight.direction;
         NoL = dot(normal, lightDir);

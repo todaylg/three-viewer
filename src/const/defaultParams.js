@@ -47,12 +47,6 @@ const pbrDefaultUniforms = {
 	uBrightness:{
 		value: 1.0
 	},
-	uSpecularPeak:{
-		value: 1.0
-	},
-	uOcclusionHorizon: {
-		value: 0
-	},
 };
 
 const pbrDefaultDefines = {

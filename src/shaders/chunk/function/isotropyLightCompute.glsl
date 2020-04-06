@@ -1,4 +1,5 @@
-// ************************************ Specular ************************************
+// Refer: UE4
+
 // ************************ Normal Distribution Functions(NDF) **************************
 
 // [Blinn 1977, "Models of light reflection for computer synthesized pictures"]
@@ -46,7 +47,7 @@ vec3 F_Schlick(float VoH, vec3 f0, float f90){
 vec3 F_CookTorrance(float VoH, vec3 f0, float f90){
     vec3 sqrtSpec = sqrt(f0);
     vec3 n = (1.0 + sqrtSpec) / (1.0 - sqrtSpec);
-    float c = clamp( VoH, 0.0, 1.0 );
+    float c = saturate(VoH);
     vec3 g = sqrt(n * n + c * c - 1.0);
 
     vec3 part1 = (g - c)/(g + c);
@@ -117,6 +118,15 @@ float Vis_SmithJointApprox(vec3 precomputeLight, float NoL){
     return 0.5 / (Vis_SmithV + Vis_SmithL);
 }
 
+// Hammon 2017, "PBR Diffuse Lighting for GGX+Smith Microsurfaces"
+float Vis_SmithJointApprox_Hammon(vec3 precomputeLight, float NoL) {
+    float roughness = precomputeLight.x;
+    float NoV = precomputeLight.z;
+
+    float v = 0.5 / mix(2.0 * NoL * NoV, NoL + NoV, roughness);
+    return v;
+}
+
 float Specular_V(vec3 precomputeLight, float NoL, float VoH){
 #if defined(V_IMPLICIT)
     return Vis_Implicit();
@@ -130,6 +140,8 @@ float Specular_V(vec3 precomputeLight, float NoL, float VoH){
     return Vis_Smith(precomputeLight, NoL);
 #elif defined(V_SMITHJOINTAPPROX)
     return Vis_SmithJointApprox(precomputeLight, NoL);
+#elif defined(V_HAMMONAPPROX)
+    return Vis_SmithJointApprox_Hammon(precomputeLight, NoL);
 #else
 	return 0.25;
 #endif
@@ -213,8 +225,8 @@ void lightCompute(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomp
         return;
     }
     vec3 H = normalize(viewDir + lightDir);
-    float NoH =  clamp(dot(normal, H), 0., 1.);
-    float VoH =  clamp(dot(viewDir, H), 0., 1.);
+    float NoH =  saturate(dot(normal, H));
+    float VoH =  saturate(dot(viewDir, H));
 	
     vec3 colorAttenuate = attenuation * NoL * lightColor;
     diffuseOut = colorAttenuate * diffuseCompute(precomputeLight, diffuse, NoL, VoH);

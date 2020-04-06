@@ -7,8 +7,6 @@ mat3 environmentTransform;
 uniform float uEnvBrightness;
 uniform vec3 uEnvironmentSphericalHarmonics[9];
 
-uniform int uSpecularPeak;
-uniform int uOcclusionHorizon;
 uniform sampler2D uIntegrateBRDF;
 
 uniform vec3 diffuse;
@@ -104,10 +102,17 @@ void main(){
         #include <metalnessmap_fragment>
         float f0 = 0.04;
         materialSpecular = mix(vec3(f0), diffuseColor.rgb, metalnessFactor);
+        // materialSpecular = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor * metallic;
         materialDiffuse = diffuseColor.rgb * (1.0 - metalnessFactor);
     #endif
 
-    float materialF90 = clamp(50.0 * materialSpecular.g, 0.0, 1.0);
+    float materialF90 = 1.0;
+    #ifndef MOBILE
+    materialF90 = saturate(dot(materialSpecular, vec3(50.0 * 0.33)));
+    // cheap luminance approximation
+    // materialF90 = saturate(50.0 * materialSpecular.g);
+    #endif
+
     // Roughness
     const float minRoughness = 0.001;
     float materialRoughness = max(minRoughness , roughnessVal);
@@ -115,7 +120,7 @@ void main(){
     // IBL
     vec3 transformedNormal = environmentTransform * normal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
-    vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, normal, materialF90);
+    vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, materialF90);
     // AO
     float materialAO = 1.0;
     #ifdef USE_AOMAP

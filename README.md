@@ -51,14 +51,16 @@ npm run build
 - [x] Specular Glossiness Material
 
 - [x] Panorama EnvMap(For the devices that dont support lod)
-  
-- [ ] Anisotropy(GGX)
-  
-- [ ] Spot/Point Light and Shadow
 
+- [ ] Fix energy loss in specular reflectance
+  
 - [ ] Clearcoat
 
+- [ ] Anisotropy(GGX)
+  
 - [ ] Sheen
+
+- [ ] Spot/Point Light and Shadow
 
 - [ ] MorphTarget/Skin Animation
 

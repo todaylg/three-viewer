@@ -4,6 +4,15 @@ import { GLTFLoader } from 'LIB/threejs/loaders/GLTFLoader';
 export default class Loader {
 	constructor() {}
 
+	loadTexture(src){
+		let loader = new THREE.TextureLoader();
+		return new Promise(resolve => {
+			loader.load(src, (texture) => {
+				resolve(texture);
+			})
+		})
+	}
+
 	importGLTF(fileMap) {
 		let rootFile, rootPath;
 		Array.from(fileMap).forEach(([path, file]) => {

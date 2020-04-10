@@ -32,6 +32,7 @@ module.exports = {
 			],
 			alias: {
 				'@': path.resolve(__dirname, './src'),
+				JS: path.resolve(__dirname, './src/js'),
 				LIB: path.resolve(__dirname, './src/libs')
 			}
 		};

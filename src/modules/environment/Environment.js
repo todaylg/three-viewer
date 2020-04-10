@@ -3,9 +3,10 @@
 import * as THREE from 'three';
 import EnvironmentCubeMap from './EnvironmentCubeMap';
 import EnvironmentPanorama from './EnvironmentPanorama';
-import IntegrateBRDFMap from './IntegrateBRDFMap';
 import EnvironmentSphericalHarmonics from './EnvironmentSphericalHarmonics';
 import fileHelper from './fileHelper';
+import Loader from 'JS/Loader';
+import brdfLUT from './assets/brdfLUT.jpg';
 
 class Environment {
 	constructor(viewer) {
@@ -15,6 +16,7 @@ class Environment {
 		this._files = {};
 		let ctx = renderer.getContext();
 		this.textureLODSupport = ctx.getExtension('EXT_shader_texture_lod');
+		this.uIntegrateBRDF = null;
 	}
 
 	async loadPackage(url) {
@@ -65,14 +67,11 @@ class Environment {
 		this.uEnvironmentLodRange = [nbLod, maxLod];
 		this.uEnvironmentSize = [mapSize, mapSize];
 		
-		if(!this.isMobile){
+		if(!this.isMobile && !this.uIntegrateBRDF){
 			// LUT
-			let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');
-			let lutFile = lutTextureData.file;
-			let lutSize = lutTextureData.width;
-			let lutData = await fileHelper.requestResource(`${this.url}${lutFile}`);
-			this._integrateBRDF = new IntegrateBRDFMap(lutData, lutSize);
-			this.uIntegrateBRDF = this._integrateBRDF.loadPacked();
+			let loader = new Loader();
+			this.uIntegrateBRDF = await loader.loadTexture(brdfLUT);
+			this.uIntegrateBRDF.flipY = false;
 		}
 
 		// Background

@@ -11,10 +11,7 @@
 #else
 vec3 integrateBRDF(const in vec3 specular, const in float roughness, const in float NoV, const in float f90) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
-    float b = (rgba[3] * 65280.0 + rgba[2] * 255.0);
-    float a = (rgba[1] * 65280.0 + rgba[0] * 255.0);
-    const float div = 1.0 / 65535.0;
-    return (specular * a + b * f90) * div;
+    return specular * rgba.r + rgba.g * f90;
 }
 #endif
 

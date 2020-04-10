@@ -118,9 +118,10 @@ void main(){
     float materialRoughness = max(minRoughness , roughnessVal);
 
     // IBL
+    vec3 specularDFG;
     vec3 transformedNormal = environmentTransform * normal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
-    vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, materialF90);
+    vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, materialF90, specularDFG);
     // AO
     float materialAO = 1.0;
     #ifdef USE_AOMAP
@@ -129,8 +130,9 @@ void main(){
     diffuseIBL *= uEnvBrightness * materialAO;
 
     float aoSpec = 1.0;
+    float energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     aoSpec = occlusionHorizon(materialAO, normal, viewDir);
-    specularIBL *= uEnvBrightness * aoSpec;
+    specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
 
     // Light
     float attenuation, NoL;
@@ -183,7 +185,7 @@ void main(){
     vec3 resultSpecular = specularIBL + resultLightSpecular;
 
     vec3 totalResult = resultDiffuse + resultSpecular + totalEmissiveRadiance;
-    vec4 frag = vec4( totalResult, diffuseColor.a );
+    vec4 frag = vec4(totalResult, diffuseColor.a);
     gl_FragColor = LinearTosRGB(frag);
 
     #include <tonemapping_fragment>

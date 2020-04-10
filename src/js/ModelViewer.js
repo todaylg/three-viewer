@@ -122,32 +122,10 @@ export default class ModelViewer {
 		scene.add(this.background);
 
 		// Load Model
-		// let gltfScene = this.gltfScene;
-		// scene.add(gltfScene);
-		// this.adjustFactorFromBox(gltfScene);
-		
-		// Test
-		let gltfScene =  this.gltfScene = new THREE.Scene();
-		var geometry = new THREE.SphereBufferGeometry( 0.4, 32, 32 );
-
-		for ( var x = 0; x <= 10; x ++ ) {
-			for ( var y = 0; y <= 10; y ++ ) {
-				var material = new THREE.MeshPhysicalMaterial( {
-					roughness: x / 10,
-					metalness: y / 10,
-					color: 0xffffff,
-					envMapIntensity: 1,
-					reflectivity: 1
-				} );
-				var mesh = new THREE.Mesh( geometry, material );
-				mesh.position.x = x - 5;
-				mesh.position.y = 5 - y;
-				gltfScene.add( mesh );
-			}
-		}
+		let gltfScene = this.gltfScene;
 		scene.add(gltfScene);
 		this.adjustFactorFromBox(gltfScene);
-
+		
 		// Load Shader
 		let { pbrVS, pbrFS } = this.program.getPBRShader();
 		let shadowDepthRange = (this.shadowDepthRange = new THREE.Vector2(

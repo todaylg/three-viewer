@@ -7,3 +7,7 @@ float occlusionHorizon(float ao, vec3 normal, vec3 viewDir) {
 float computeSpecularAO(float NoV, float ao, float roughness) {
     return clamp(pow(NoV + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao, 0.0, 1.0);
 }
+
+float getEnergyCompensation(vec3 dfg, float f0) {
+   return 1.0 + f0 * (1.0 / dfg.y - 1.0);
+}

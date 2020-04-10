@@ -9,9 +9,11 @@
 #ifdef MOBILE
     #preImport <integrateBRDFMobile>
 #else
-vec3 integrateBRDF(const in vec3 specular, const in float roughness, const in float NoV, const in float f90) {
+vec3 integrateBRDF(vec3 specular, float roughness, float NoV, float f90, inout vec3 specularDFG) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
-    return specular * rgba.r + rgba.g * f90;
+    // return specular * rgba.r + rgba.g * f90;
+    specularDFG = mix(rgba.xxx, rgba.yyy, specular);
+    return specularDFG;
 }
 #endif
 
@@ -21,7 +23,7 @@ float linRoughnessToMipmap(float roughnessLinear){
     return sqrt(roughnessLinear);
 }
 
-vec3 prefilterEnvMap(const in float rLinear, const in vec3 R) {
+vec3 prefilterEnvMap(float rLinear, vec3 R) {
     vec3 dir = R;
     float lod = linRoughnessToMipmap(rLinear) * uEnvironmentLodRange[1]; //(uEnvironmentMaxLod - 1.0);
     lod = min(uEnvironmentLodRange[0], lod);
@@ -46,13 +48,13 @@ vec3 prefilterEnvMap(const in float rLinear, const in vec3 R) {
 // N is the normal direction
 // R is the mirror vector
 // This approximation works fine for G smith correlated and uncorrelated
-vec3 getSpecularDominantDir(const in vec3 N, const in vec3 R, const in float realRoughness) {
+vec3 getSpecularDominantDir(vec3 N, vec3 R, float realRoughness) {
     float smoothness = 1.0 - realRoughness;
     float lerpFactor = smoothness * (sqrt(smoothness) + realRoughness);
     return mix(N, R, lerpFactor);
 }
 
-vec3 getPrefilteredEnvMapColor(const in vec3 normal, const in vec3 viewDir, const in float roughness, const in vec3 frontNormal) {
+vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 frontNormal) {
     vec3 R = reflect(-viewDir, normal);
     // From Sebastien Lagarde Moving Frostbite to PBR page 69
     // so roughness = linRoughness * linRoughness
@@ -62,7 +64,7 @@ vec3 getPrefilteredEnvMapColor(const in vec3 normal, const in vec3 viewDir, cons
     return prefilteredColor;
 }
 
-vec3 computeIBLSpecularUE4(const in vec3 normal, const in vec3 viewDir, const in float roughness, const in vec3 specular, const in vec3 frontNormal, const in float f90) {
+vec3 computeIBLSpecularUE4(vec3 normal, vec3 viewDir, float roughness, vec3 specular, vec3 frontNormal, float f90, inout vec3 specularDFG) {
     float NoV = dot(normal, viewDir);
-    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * integrateBRDF(specular, roughness, NoV, f90);
+    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * integrateBRDF(specular, roughness, NoV, f90, specularDFG);
 }

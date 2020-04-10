@@ -52,7 +52,7 @@ npm run build
 
 - [x] Panorama EnvMap(For the devices that dont support lod)
 
-- [x] Fix energy loss in specular reflectance
+- [ ] Fix energy loss in specular reflectance
   
 - [ ] Clearcoat
 

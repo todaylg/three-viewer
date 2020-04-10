@@ -130,9 +130,10 @@ void main(){
     diffuseIBL *= uEnvBrightness * materialAO;
 
     float aoSpec = 1.0;
+    // ToCheck
     float energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     aoSpec = occlusionHorizon(materialAO, normal, viewDir);
-    specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
+    specularIBL *= uEnvBrightness * aoSpec;
 
     // Light
     float attenuation, NoL;

@@ -6,7 +6,7 @@ PBR rendering experiment of a single model, convenient comparison of rendering e
 
 ![image](https://github.com/todaylg/three-viewer/blob/master/intro/zelda.png)
 
-![image](https://github.com/todaylg/three-viewer/blob/master/intro/masterSword.png)
+![image](https://github.com/todaylg/three-viewer/blob/master/intro/abyss.png)
 
 ### Feature
 

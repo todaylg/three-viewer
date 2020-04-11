@@ -68,12 +68,9 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		this.uniforms['uEnvironmentSphericalHarmonics'] = { value: uEnvironmentSphericalHarmonics };
 		this.uniforms['uEnvironmentLodRange'] = { value: uEnvironmentLodRange };
 		this.uniforms['uEnvironmentSize'] = { value: uEnvironmentSize };
-		// Mobile optimize
-		if (environment.isMobile) {
-			this.defines[`MOBILE`] = 1;
-		} else {
-			this.uniforms['uIntegrateBRDF'] = { value: environment.uIntegrateBRDF };
-		}
+		this.uniforms['uIntegrateBRDF'] = { value: environment.uIntegrateBRDF };
+		// Mobile 
+		if (environment.isMobile) this.defines[`MOBILE`] = 1;
 	}
 
 	syncParam(sourceMaterial) {

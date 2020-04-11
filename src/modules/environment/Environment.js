@@ -3,10 +3,10 @@
 import * as THREE from 'three';
 import EnvironmentCubeMap from './EnvironmentCubeMap';
 import EnvironmentPanorama from './EnvironmentPanorama';
+import IntegrateBRDFMap from './IntegrateBRDFMap';
 import EnvironmentSphericalHarmonics from './EnvironmentSphericalHarmonics';
 import fileHelper from './fileHelper';
-import Loader from 'JS/Loader';
-import brdfLUT from './assets/brdfLUT.jpg';
+const brdfLUTPath = './assets/envMap/brdf_ue4.bin.gz';
 
 class Environment {
 	constructor(viewer) {
@@ -67,11 +67,13 @@ class Environment {
 		this.uEnvironmentLodRange = [nbLod, maxLod];
 		this.uEnvironmentSize = [mapSize, mapSize];
 		
-		if(!this.isMobile && !this.uIntegrateBRDF){
+		if(!this.uIntegrateBRDF){
 			// LUT
-			let loader = new Loader();
-			this.uIntegrateBRDF = await loader.loadTexture(brdfLUT);
-			this.uIntegrateBRDF.flipY = false;
+			let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');
+			let lutSize = lutTextureData.width;
+			let lutData = await fileHelper.requestResource(brdfLUTPath);
+			this._integrateBRDF = new IntegrateBRDFMap(lutData, lutSize);
+			this.uIntegrateBRDF = this._integrateBRDF.loadPacked();
 		}
 
 		// Background

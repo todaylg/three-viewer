@@ -52,6 +52,7 @@ const pbrDefaultUniforms = {
 const pbrDefaultDefines = {
 	ENABLE_IBL: 1,
 	ENABLE_LIGHT: 1,
+	ENERGY_COMPENSATION: 1,
 	DIFFUSE_LAMBERT: 1,
 	NDF_GGX: 1,
 	F_SCHLICK: 1,

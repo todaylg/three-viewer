@@ -6,16 +6,13 @@
     #preImport <panoramaSampler>
 #endif
 
-#ifdef MOBILE
-    #preImport <integrateBRDFMobile>
-#else
-vec3 integrateBRDF(vec3 specular, float roughness, float NoV, float f90, inout vec3 specularDFG) {
+vec3 integrateBRDF(vec3 specular, float roughness, float NoV, inout vec3 specularDFG) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
-    // return specular * rgba.r + rgba.g * f90;
-    specularDFG = mix(rgba.xxx, rgba.yyy, specular);
+    float a = (rgba[1] * 65280.0 + rgba[0] * 255.0) / 65535.0;
+    float b = (rgba[3] * 65280.0 + rgba[2] * 255.0) / 65535.0;
+    specularDFG = (1.-specular) * a + specular * b;
     return specularDFG;
 }
-#endif
 
 // frostbite, lagarde paper p67
 // http://www.frostbite.com/wp-content/uploads/2014/11/course_notes_moving_frostbite_to_pbr.pdf
@@ -64,12 +61,8 @@ vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 
     return prefilteredColor;
 }
 
-vec3 computeIBLSpecularUE4(vec3 normal, vec3 viewDir, float roughness, vec3 specular, vec3 frontNormal, float f90, inout vec3 specularDFG) {
+vec3 computeIBLSpecularUE4(vec3 normal, vec3 viewDir, float roughness, vec3 specular, vec3 frontNormal, inout vec3 specularDFG) {
     float NoV = dot(normal, viewDir);
-#ifdef MOBILE
-    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, f90);
-#else
-    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, f90, specularDFG);
-#endif
+    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, specularDFG);
     return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * brdfLUT;
 }

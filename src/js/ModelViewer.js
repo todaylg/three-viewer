@@ -125,7 +125,7 @@ export default class ModelViewer {
 		let gltfScene = this.gltfScene;
 		scene.add(gltfScene);
 		this.adjustFactorFromBox(gltfScene);
-		
+
 		// Load Shader
 		let { pbrVS, pbrFS } = this.program.getPBRShader();
 		let shadowDepthRange = (this.shadowDepthRange = new THREE.Vector2(
@@ -209,6 +209,7 @@ export default class ModelViewer {
 		let params = (this.guiParams = {
 			enableIBL: !!pbrDefaultDefines.ENABLE_IBL,
 			enableLight: !!pbrDefaultDefines.ENABLE_LIGHT,
+			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
 			envRotation: this.envRotation,
 			envBrightness: this.envBrightness.value,
 			envMap: envMapList[0],
@@ -241,6 +242,13 @@ export default class ModelViewer {
 				document.querySelector('#wrapper').classList.remove('isLoading');
 			});
 		});
+		pbrFolder
+			.add(params, 'enableCompensation')
+			.name('compensation')
+			.onChange(value => {
+				this.guiParams.enableCompensation = value;
+				this.reCompileShader();
+			});
 		pbrFolder
 			.add(params, 'envRotation', -Math.PI, Math.PI)
 			.step(0.1)
@@ -304,7 +312,7 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/;
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/;
 		Object.keys(defines).map(key => {
 			if(reg.test(key)){
 				delete defines[key];
@@ -313,6 +321,7 @@ export default class ModelViewer {
 		// Reset
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
+		if (guiParams.enableCompensation) defines.ENERGY_COMPENSATION = 1;
 		defines[`DIFFUSE_${guiParams.diffuseEquation.toUpperCase()}`] = 1;
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;

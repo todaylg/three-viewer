@@ -19,9 +19,10 @@ export default class MainScene {
 		renderer.domElement.id = 'canvasWebGL';
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(this.width, this.height);
-		renderer.gammaFactor = 2.2;
 		renderer.setClearColor(0xffffff, 1.0);
 		renderer.shadowMap.enabled = true;
+		renderer.gammaFactor = 2.2;
+		renderer.outputEncoding = THREE.sRGBEncoding;
 		container.appendChild(renderer.domElement);
 		// Scene
 		this.initScene(gltf, callback);

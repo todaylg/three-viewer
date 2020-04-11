@@ -42,7 +42,8 @@ void main(){
     vec3 direction = normalize(vViewNormal);
     direction = getEnvironmentTransfrom(uEnvironmentTransform) * direction;
     vec4 samplerColor = uEnvBrightness * textureCubeFixed(envMap, direction);
-    gl_FragColor = LinearTosRGB(samplerColor);
     
+    gl_FragColor = samplerColor;
     #include <tonemapping_fragment>
+    #include <encodings_fragment>
 }

@@ -66,5 +66,10 @@ vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 
 
 vec3 computeIBLSpecularUE4(vec3 normal, vec3 viewDir, float roughness, vec3 specular, vec3 frontNormal, float f90, inout vec3 specularDFG) {
     float NoV = dot(normal, viewDir);
-    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * integrateBRDF(specular, roughness, NoV, f90, specularDFG);
+#ifdef MOBILE
+    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, f90);
+#else
+    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, f90, specularDFG);
+#endif
+    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * brdfLUT;
 }

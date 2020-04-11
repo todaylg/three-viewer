@@ -118,7 +118,7 @@ void main(){
     float materialRoughness = max(minRoughness , roughnessVal);
 
     // IBL
-    vec3 specularDFG;
+    vec3 specularDFG = vec3(1.0);
     vec3 transformedNormal = environmentTransform * normal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
     vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, materialF90, specularDFG);

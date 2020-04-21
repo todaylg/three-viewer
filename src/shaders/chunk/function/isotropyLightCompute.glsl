@@ -147,7 +147,7 @@ float Specular_V(vec3 precomputeLight, float NoL, float VoH){
 #endif
 }
 
-vec3 specularCompute(vec3 precomputeLight, vec3 specular, float NoL, float NoH, float VoH, float f90) {
+vec3 specularLobe(vec3 precomputeLight, vec3 specular, float NoL, float NoH, float VoH, float f90) {
     float D = Specular_D(precomputeLight, NoH);
     vec3 F = Specular_F(VoH, specular, f90);
     float V = Specular_V(precomputeLight, NoL, VoH);
@@ -204,7 +204,7 @@ vec3 Diffuse_Gotanda(vec3 precomputeLight, vec3 diffuse, float NoL, float VoH){
 	return diffuse / PI * Lr;
 }
 
-vec3 diffuseCompute(vec3 precomputeLight, vec3 diffuse, float NoL, float VoH){
+vec3 diffuseLobe(vec3 precomputeLight, vec3 diffuse, float NoL, float VoH){
 #if defined(DIFFUSE_LAMBERT)
     return Diffuse_Lambert(diffuse);
 #elif defined(DIFFUSE_BURLEY)
@@ -218,7 +218,7 @@ vec3 diffuseCompute(vec3 precomputeLight, vec3 diffuse, float NoL, float VoH){
 #endif
 }
 
-void lightCompute(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomputeLight, in vec3 diffuse, in vec3 specular, in float attenuation, in vec3 lightColor, in vec3 lightDir, in float f90, out vec3 diffuseOut, out vec3 specularOut, out bool lighted) {
+void surfaceShading(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomputeLight, in vec3 diffuse, in vec3 specular, in float attenuation, in vec3 lightColor, in vec3 lightDir, in float f90, out vec3 diffuseOut, out vec3 specularOut, out bool lighted) {
     lighted = NoL > 0.0;
     if (!lighted) {
         specularOut = diffuseOut = vec3(0.0);
@@ -229,6 +229,6 @@ void lightCompute(in vec3 normal, in vec3 viewDir, in float NoL, in vec3 precomp
     float VoH =  saturate(dot(viewDir, H));
 	
     vec3 colorAttenuate = attenuation * NoL * lightColor;
-    diffuseOut = colorAttenuate * diffuseCompute(precomputeLight, diffuse, NoL, VoH);
-    specularOut = colorAttenuate * specularCompute(precomputeLight, specular, NoL, NoH, VoH, f90);
+    diffuseOut = colorAttenuate * diffuseLobe(precomputeLight, diffuse, NoL, VoH);
+    specularOut = colorAttenuate * specularLobe(precomputeLight, specular, NoL, NoH, VoH, f90);
 }

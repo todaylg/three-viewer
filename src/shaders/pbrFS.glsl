@@ -129,11 +129,12 @@ void main(){
     #endif
     diffuseIBL *= uEnvBrightness * materialAO;
 
-    float aoSpec = 1.0;
     float energyCompensation = 1.0;
     #ifdef ENERGY_COMPENSATION
     energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     #endif
+    // Todo:Compare specular ao method
+    float aoSpec = 1.0;
     aoSpec = occlusionHorizon(materialAO, normal, viewDir);
     specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
 
@@ -158,7 +159,8 @@ void main(){
 	    for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
             directionalLight = directionalLights[ i ];
             precomputeDirect(normal, viewDir, directionalLight, attenuation, lightDir, NoL);
-            lightCompute(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
+            surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
+            lightSpecular *= energyCompensation;
             // Shadow
             #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
             directionalLightShadow = directionalLightShadows[ i ];
@@ -189,7 +191,6 @@ void main(){
 
     vec3 totalResult = resultDiffuse + resultSpecular + totalEmissiveRadiance;
     vec4 frag = vec4(totalResult, diffuseColor.a);
-
     gl_FragColor = frag;
     #include <tonemapping_fragment>
     #include <encodings_fragment>

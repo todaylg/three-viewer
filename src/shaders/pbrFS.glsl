@@ -64,7 +64,7 @@ varying vec3 vNormal;
 #preImport <light>
 #preImport <ibl>
 #preImport <brdf>
-#preImport <specularAO>
+#preImport <advance>
 
 void main(){
     vec3 viewDir = -normalize(vViewPosition);
@@ -115,14 +115,17 @@ void main(){
 
     // Roughness
     const float minRoughness = 0.001;
-    float materialRoughness = max(minRoughness , roughnessVal);
+    float materialRoughness = max(minRoughness, roughnessVal);
+
+    vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
 
     // IBL
     vec3 specularDFG = vec3(1.0);
     vec3 transformedNormal = environmentTransform * normal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
     vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, specularDFG);
-    // AO
+    
+    // Diffuse AO
     float materialAO = 1.0;
     #ifdef USE_AOMAP
 	materialAO = (texture2D(aoMap, vUv2).r - 1.0) * aoMapIntensity + 1.0;
@@ -133,9 +136,13 @@ void main(){
     #ifdef ENERGY_COMPENSATION
     energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     #endif
-    // Todo:Compare specular ao method
+    // Specular AO
     float aoSpec = 1.0;
+    #ifdef SPECULAR_AO_MARMOSETCO
     aoSpec = occlusionHorizon(materialAO, normal, viewDir);
+    #elif defined(SPECULAR_AO_SEBLAGARDE)
+    aoSpec = computeSpecularAO(materialAO, prepCompute);
+    #endif
     specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
 
     // Light
@@ -147,7 +154,6 @@ void main(){
     vec3 resultLightDiffuse;
     bool lighted;
     float shadow = 1.0;
-    vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
     float shadowDistance;
 
     #if NUM_DIR_LIGHTS > 0

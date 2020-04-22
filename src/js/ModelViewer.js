@@ -13,7 +13,8 @@ import {
 	specularNDFEquation,
 	specularFresnelEquation,
 	specularVisEquation,
-	toneMappingList
+	toneMappingList,
+	specularAOList
 } from '../const/config';
 import { pbrDefaultDefines } from '../const/defaultParams';
 // Utils
@@ -209,7 +210,6 @@ export default class ModelViewer {
 		let params = (this.guiParams = {
 			enableIBL: !!pbrDefaultDefines.ENABLE_IBL,
 			enableLight: !!pbrDefaultDefines.ENABLE_LIGHT,
-			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
 			envRotation: this.envRotation,
 			envBrightness: this.envBrightness.value,
 			envMap: envMapList[0],
@@ -220,6 +220,9 @@ export default class ModelViewer {
 			specularFresnelEquation: specularFresnelEquation[0],
 			specularNDFEquation: specularNDFEquation[0],
 			specularVisEquation: specularVisEquation[0],
+			// Advance
+			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
+			specularAO: specularAOList[0],
 			// Post
 			toneMapping: toneMappingList[0]
 		});
@@ -242,13 +245,6 @@ export default class ModelViewer {
 				document.querySelector('#wrapper').classList.remove('isLoading');
 			});
 		});
-		pbrFolder
-			.add(params, 'enableCompensation')
-			.name('compensation')
-			.onChange(value => {
-				this.guiParams.enableCompensation = value;
-				this.reCompileShader();
-			});
 		pbrFolder
 			.add(params, 'envRotation', -Math.PI, Math.PI)
 			.step(0.1)
@@ -302,6 +298,18 @@ export default class ModelViewer {
 		});
 		equationsFolder.open();
 
+		const advanceFolder = gui.addFolder('Advance');
+		advanceFolder.add(params, 'enableCompensation')
+			.name('compensation')
+			.onChange(value => {
+				this.guiParams.enableCompensation = value;
+				this.reCompileShader();
+			});
+		advanceFolder.add(params, 'specularAO', specularAOList).onChange(value => {
+				this.guiParams.specularAO = value;
+				this.reCompileShader();
+			});
+		
 		const postFolder = gui.addFolder('Post-Processing');
 		postFolder.add(params, 'toneMapping', toneMappingList).onChange(value => {
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
@@ -312,7 +320,7 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)/;
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)/;
 		Object.keys(defines).map(key => {
 			if(reg.test(key)){
 				delete defines[key];
@@ -326,6 +334,7 @@ export default class ModelViewer {
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;
 		defines[`V_${guiParams.specularVisEquation.toUpperCase()}`] = 1;
+		defines[`SPECULAR_AO_${guiParams.specularAO.toUpperCase()}`] = 1;
 		return defines;
 	}
 

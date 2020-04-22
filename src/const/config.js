@@ -52,6 +52,12 @@ const toneMappingList = [
 	'No',
 ];
 
+const specularAOList = [
+	'Marmosetco',
+	'Seblagarde',
+	'None'
+]
+
 export {
     envMapPath,
     envMapList,
@@ -59,5 +65,6 @@ export {
     specularFresnelEquation,
     specularNDFEquation,
 	specularVisEquation,
-	toneMappingList
+	toneMappingList,
+	specularAOList
 }

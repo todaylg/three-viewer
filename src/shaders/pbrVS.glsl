@@ -11,6 +11,8 @@ varying vec3 vNormal;
 #include <uv_pars_vertex>
 #include <uv2_pars_vertex>
 #include <color_pars_vertex>
+#include <morphtarget_pars_vertex>
+#include <skinning_pars_vertex>
 #include <logdepthbuf_pars_vertex>
 #include <shadowmap_pars_vertex>
 
@@ -19,8 +21,10 @@ void main(){
 	#include <uv2_vertex>
     #include <color_vertex>
     #include <beginnormal_vertex>
+	#include <morphnormal_vertex>
+	#include <skinbase_vertex>
+	#include <skinnormal_vertex>
 	#include <defaultnormal_vertex>
-	// Todo: morph and skin
 
 	vNormal = normalize( transformedNormal );
 	#ifdef USE_TANGENT
@@ -29,6 +33,8 @@ void main(){
 	#endif
 
     #include <begin_vertex>
+	#include <morphtarget_vertex>
+	#include <skinning_vertex>
 	#include <project_vertex>
 
     vViewPosition = mvPosition.xyz;

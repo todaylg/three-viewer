@@ -26,8 +26,10 @@ import { GUI } from 'LIB/threejs/libs/dat.gui.module.js';
 
 export default class ModelViewer {
 	constructor(mainScene, gltf, callBack) {
+		this.gltf = gltf;
 		this.gltfScene = gltf.scene;
-		this.time = 0;
+		this.clock = new THREE.Clock();
+		this.animationMixer = null;
 		this.debug = false;
 		this.program = new Program();
 		this.isMobile = isMobile();
@@ -124,6 +126,17 @@ export default class ModelViewer {
 
 		// Load Model
 		let gltfScene = this.gltfScene;
+		// Animation
+		let animations = this.gltf.animations;
+		if (animations && animations.length) {
+			this.animationMixer = new THREE.AnimationMixer(gltfScene);
+			for (let i = 0; i < animations.length; i++) {
+				let animation = animations[i];
+				let action = this.animationMixer.clipAction(animation);
+				action.play();
+			}
+		}
+
 		scene.add(gltfScene);
 		this.adjustFactorFromBox(gltfScene);
 
@@ -359,6 +372,7 @@ export default class ModelViewer {
 
 	update() {
 		this.updateEnvironmentRotation(this.envRotation);
+		if ( this.animationMixer ) this.animationMixer.update(this.clock.getDelta());
 		this.renderer.render(this.scene, this.camera);
 	}
 }

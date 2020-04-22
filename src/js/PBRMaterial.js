@@ -7,13 +7,13 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		super();
 		this.modelNormalMatrix = new THREE.Matrix3();
 		this.copy(sourceMaterial);
-
+		
 		this.defines = Object.assign({}, pbrDefaultDefines);
 		// VertexTangents rely on (vertexTangents && normalMap) in threejs
 		// if(this.vertexTangents) this.defines.USE_TANGENT = 1;
 		// Copy method no include normalMapType
 		this.normalMapType = sourceMaterial.normalMapType;
-
+		
 		// Uniforms
 		let UniformsLib = THREE.UniformsLib;
 		this.uniforms = THREE.UniformsUtils.merge([

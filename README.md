@@ -62,8 +62,6 @@ npm run build
 
 - [ ] Spot/Point Light and Shadow
 
-- [ ] MorphTarget/Skin Animation
-
 - [ ] Post-processing(SSS、TAA)
 
 - [ ] Ground Shadow

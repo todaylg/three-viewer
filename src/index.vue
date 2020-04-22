@@ -64,10 +64,10 @@ export default {
 				})
 			);
 		},
-		loadDefaultMode(src = './assets/models/DamagedHelmet/'){
+		loadDefaultMode(){
 			let loader = new Loader();
 			this.openImportPage = false;
-			loader.loadGLTF(src).then(gltf => {
+			loader.loadGLTF('./assets/models/damagedHelmet/').then(gltf => {
 				this.initScene(gltf);
 			})
 		}

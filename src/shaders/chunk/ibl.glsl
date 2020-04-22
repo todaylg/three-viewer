@@ -54,10 +54,12 @@ vec3 getSpecularDominantDir(vec3 N, vec3 R, float realRoughness) {
 vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 frontNormal) {
     vec3 R = reflect(-viewDir, normal);
     // From Sebastien Lagarde Moving Frostbite to PBR page 69
-    // so roughness = linRoughness * linRoughness
-    R = getSpecularDominantDir(normal, R, roughness);
+    R = getSpecularDominantDir(normal, R, roughness * roughness);
 
     vec3 prefilteredColor = prefilterEnvMap(roughness, environmentTransform * R);
+
+    float factor = clamp(1.0 + dot(R, frontNormal), 0.0, 1.0);
+    prefilteredColor *= factor * factor;
     return prefilteredColor;
 }
 

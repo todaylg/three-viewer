@@ -58,6 +58,7 @@ const pbrDefaultDefines = {
 	F_SCHLICK: 1,
 	V_SMITHJOINTAPPROX: 1,
 	SPECULAR_AO_MARMOSETCO: 1,
+	NORMAL_AA: 0
 };
 
 export { syncMapArr, syncUniformArr, pbrDefaultUniforms, bgDefaultUniforms, pbrDefaultDefines };

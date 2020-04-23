@@ -2,6 +2,7 @@ uniform mat3 uModelNormalMatrix;
 varying vec3 vViewPosition;
 
 varying vec3 vNormal;
+varying vec3 vWorldNormal;
 
 #ifdef USE_TANGENT
 	varying vec3 vTangent;
@@ -26,10 +27,12 @@ void main(){
 	#include <skinnormal_vertex>
 	#include <defaultnormal_vertex>
 
-	vNormal = normalize( transformedNormal );
+	vNormal = normalize(transformedNormal);
+	vWorldNormal = uModelNormalMatrix * normal;
+
 	#ifdef USE_TANGENT
-		vTangent = normalize( transformedTangent );
-		vBitangent = normalize( cross( vNormal, vTangent ) * tangent.w );
+		vTangent = normalize(transformedTangent);
+		vBitangent = normalize(cross(vNormal, vTangent) * tangent.w);
 	#endif
 
     #include <begin_vertex>

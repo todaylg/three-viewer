@@ -28,7 +28,7 @@ void main(){
 	#include <defaultnormal_vertex>
 
 	vNormal = normalize(transformedNormal);
-	vWorldNormal = uModelNormalMatrix * normal;
+	vWorldNormal = uModelNormalMatrix * objectNormal;
 
 	#ifdef USE_TANGENT
 		vTangent = normalize(transformedTangent);

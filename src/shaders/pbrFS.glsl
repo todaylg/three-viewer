@@ -14,8 +14,10 @@ uniform vec3 emissive;
 uniform float roughness;
 uniform float metalness;
 uniform float opacity;
-
 uniform vec2 uShadowDepthRange;
+
+uniform float specularAAThreshold;
+uniform float specularAAVariance;
 
 varying vec3 vViewPosition;
 
@@ -118,9 +120,9 @@ void main(){
     const float minRoughness = 0.001;
     float materialRoughness = max(minRoughness, roughnessVal);
 
-    #ifdef NORMAL_AA
-    // materialRoughness = adjustRoughness(materialRoughness, vNormal);
+    #ifdef GEOMETRIC_SPECULAR_AA
     materialRoughness = normalFiltering(materialRoughness, geometryNormal);
+    // materialRoughness = normalFiltering(materialRoughness, normal);
     #endif
 
     vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
@@ -136,8 +138,13 @@ void main(){
     #ifdef USE_AOMAP
 	materialAO = (texture2D(aoMap, vUv2).r - 1.0) * aoMapIntensity + 1.0;
     #endif
-    diffuseIBL *= uEnvBrightness * materialAO;
-   
+    #ifdef MS_DIFFUSE_AO
+    multiBounceAO(materialAO, materialDiffuse, diffuseIBL);
+    #else
+    diffuseIBL *= materialAO;
+    #endif
+    diffuseIBL *= uEnvBrightness;
+    
     // Specular AO
     float aoSpec = 1.0;
     #ifdef SPECULAR_AO_MARMOSETCO
@@ -149,7 +156,13 @@ void main(){
     #ifdef ENERGY_COMPENSATION
     energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     #endif
-    specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
+    #ifdef MS_SPECULAR_AO
+    multiBounceSpecularAO(materialAO, materialSpecular, specularIBL);
+    #else
+    specularIBL * aoSpec;
+    #endif
+
+    specularIBL *= uEnvBrightness * energyCompensation;
 
     // Light
     float attenuation, NoL;

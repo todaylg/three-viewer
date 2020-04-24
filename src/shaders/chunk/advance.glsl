@@ -1,3 +1,8 @@
+float getEnergyCompensation(vec3 dfg, float f0) {
+   return 1.0 + f0 * (1.0 / dfg.y - 1.0);
+}
+
+// SpecularAO
 // http://marmosetco.tumblr.com/post/81245981087
 float occlusionHorizon(float ao, vec3 normal, vec3 viewDir) {
     float d = dot(normal, viewDir) + ao;
@@ -11,25 +16,31 @@ float computeSpecularAO(float ao, vec3 precomputeLight) {
     return clamp(pow(NoV + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao, 0.0, 1.0);
 }
 
-float getEnergyCompensation(vec3 dfg, float f0) {
-   return 1.0 + f0 * (1.0 / dfg.y - 1.0);
+// MultiBounceAO
+/**
+ * Returns a color ambient occlusion based on a pre-computed visibility term.
+ * The albedo term is meant to be the diffuse color or f0 for the diffuse and
+ * specular terms respectively.
+ */
+vec3 gtaoMultiBounce(float visibility, const vec3 albedo) {
+    // Jimenez et al. 2016, "Practical Realtime Strategies for Accurate Indirect Occlusion"
+    vec3 a =  2.0404 * albedo - 0.3324;
+    vec3 b = -4.7951 * albedo + 0.6417;
+    vec3 c =  2.7552 * albedo + 0.6903;
+
+    return max(vec3(visibility), ((visibility * a + b) * visibility + c) * visibility);
 }
 
-// Todo: NormalAA 、 MultiBounceAO
-float adjustRoughness(float roughness, vec3 normal) {
-    // Based on The Order : 1886 SIGGRAPH course notes implementation (page 21 notes)
-    float normalLen = length(normal * 2.0 - 1.0);
-    if ( normalLen < 1.0) {
-        float normalLen2 = normalLen * normalLen;
-        float kappa = ( 3.0 * normalLen -  normalLen2 * normalLen )/( 1.0 - normalLen2 );
-        // http://www.frostbite.com/2014/11/moving-frostbite-to-pbr/
-        // page 91 : they use 0.5/kappa instead
-        return min(1.0, sqrt(roughness * roughness + 1.0 / kappa));
-    }
-    return roughness;
+void multiBounceAO(float visibility, const vec3 albedo, inout vec3 color) {
+    color *= gtaoMultiBounce(visibility, albedo);
 }
 
-float normalFiltering(float perceptualRoughness, const vec3 worldNormal) {
+void multiBounceSpecularAO(float visibility, const vec3 albedo, inout vec3 color) {
+    color *= gtaoMultiBounce(visibility, albedo);
+}
+
+// Todo
+float normalFiltering(float perceptualRoughness, const vec3 geometricNormal) {
     // Kaplanyan 2016, "Stable specular highlights"
     // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
     // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
@@ -41,13 +52,13 @@ float normalFiltering(float perceptualRoughness, const vec3 worldNormal) {
     // approximation but it works well enough for our needs and provides an improvement
     // over our original implementation based on Vlachos 2015, "Advanced VR Rendering".
 
-    vec3 du = dFdx(worldNormal);
-    vec3 dv = dFdy(worldNormal);
+    vec3 du = dFdx(geometricNormal);
+    vec3 dv = dFdy(geometricNormal);
 
-    float variance = 1. * (dot(du, du) + dot(dv, dv));
+    float variance = specularAAVariance * (dot(du, du) + dot(dv, dv));
 
     float roughness = perceptualRoughness * perceptualRoughness;
-    float kernelRoughness = min(2.0 * variance, 1.);
+    float kernelRoughness = min(2.0 * variance, specularAAThreshold);
     float squareRoughness = saturate(roughness * roughness + kernelRoughness);
 
     return sqrt(sqrt(squareRoughness));

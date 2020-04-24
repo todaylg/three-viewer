@@ -53,8 +53,8 @@ const toneMappingList = [
 ];
 
 const specularAOList = [
-	'Marmosetco',
 	'Seblagarde',
+	'Marmosetco',
 	'None'
 ]
 

@@ -30,10 +30,10 @@ const bgDefaultUniforms = {
 
 const pbrDefaultUniforms = {
 	roughness: {
-		value: 1.0
+		value: .5
 	},
 	metalness: {
-		value: 0.5
+		value: 0.
 	},
 	color: {
 		value: new THREE.Color(0xffffff)
@@ -47,6 +47,12 @@ const pbrDefaultUniforms = {
 	uBrightness:{
 		value: 1.0
 	},
+	specularAAVariance:{
+		value: .1
+	},
+	specularAAThreshold:{
+		value: 1.0
+	},
 };
 
 const pbrDefaultDefines = {
@@ -58,7 +64,9 @@ const pbrDefaultDefines = {
 	F_SCHLICK: 1,
 	V_SMITHJOINTAPPROX: 1,
 	SPECULAR_AO_MARMOSETCO: 1,
-	NORMAL_AA: 0
+	// GEOMETRIC_SPECULAR_AA: 1
+	MS_SPECULAR_AO: 1,
+	MS_DIFFUSE_AO: 1
 };
 
 export { syncMapArr, syncUniformArr, pbrDefaultUniforms, bgDefaultUniforms, pbrDefaultDefines };

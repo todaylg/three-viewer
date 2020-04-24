@@ -16,7 +16,8 @@ import {
 	toneMappingList,
 	specularAOList
 } from '../const/config';
-import { pbrDefaultDefines } from '../const/defaultParams';
+import { pbrDefaultDefines, pbrDefaultUniforms } from '../const/defaultParams';
+console.log(pbrDefaultUniforms);
 // Utils
 import { adjustCameraByBox, adjustSunLightByBox } from './ThreeUtils';
 import { isMobile } from './Utils';
@@ -113,11 +114,7 @@ export default class ModelViewer {
 
 	async initScene() {
 		let environment = await this.loadEnvMap();
-		let {
-			backgroundEnv,
-			uBGEnvironmentSize,
-			sunlightInfo
-		} = environment;
+		let { backgroundEnv, uBGEnvironmentSize, sunlightInfo } = environment;
 		let { scene } = this;
 
 		this.loadSunLight(sunlightInfo);
@@ -153,7 +150,7 @@ export default class ModelViewer {
 				child.material = new PBRMaterial(child, environment, {
 					pbrVS,
 					pbrFS,
-					shadowDepthRange,
+					shadowDepthRange
 				});
 				child.material.uniforms.uEnvironmentTransform = this.envRotationMat;
 				child.material.uniforms.uEnvBrightness = this.envBrightness;
@@ -164,7 +161,6 @@ export default class ModelViewer {
 				child.material.uniforms.uEnableLight = this.enableLight;
 			}
 		});
-
 
 		this.initEvent();
 		this.initGUI();
@@ -226,8 +222,8 @@ export default class ModelViewer {
 			envRotation: this.envRotation,
 			envBrightness: this.envBrightness.value,
 			envMap: envMapList[0],
-			metalness: 0,
-			roughness: 0.5,
+			metalness: pbrDefaultUniforms.metalness.value,
+			roughness: pbrDefaultUniforms.roughness.value,
 			// Equations
 			diffuseEquation: diffuseEquation[0],
 			specularFresnelEquation: specularFresnelEquation[0],
@@ -235,8 +231,12 @@ export default class ModelViewer {
 			specularVisEquation: specularVisEquation[0],
 			// Advance
 			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
-			enableNormalAA: !!pbrDefaultDefines.NORMAL_AA,
+			enableSpecularAA: !!pbrDefaultDefines.GEOMETRIC_SPECULAR_AA,
+			specularAAVariance: pbrDefaultUniforms.specularAAVariance.value,
+			specularAAThreshold: pbrDefaultUniforms.specularAAThreshold.value,
 			specularAO: specularAOList[0],
+			enableMSSpecularAO: !!pbrDefaultDefines.MS_SPECULAR_AO,
+			enableMSDiffuseAO: !!pbrDefaultDefines.MS_DIFFUSE_AO,
 			// Post
 			toneMapping: toneMappingList[0]
 		});
@@ -294,41 +294,91 @@ export default class ModelViewer {
 		pbrFolder.open();
 
 		const equationsFolder = gui.addFolder('Equations');
-		equationsFolder.add(params, 'diffuseEquation', diffuseEquation).name('diffuse').onChange(value => {
-			this.guiParams.diffuseEquation = value;
-			this.reCompileShader();
-		});
-		equationsFolder.add(params, 'specularFresnelEquation', specularFresnelEquation).name('fresnel').onChange(value => {
-			this.guiParams.specularFresnelEquation = value;
-			this.reCompileShader();
-		});
-		equationsFolder.add(params, 'specularNDFEquation', specularNDFEquation).name('NDF').onChange(value => {
-			this.guiParams.specularNDFEquation = value;
-			this.reCompileShader();
-		});
-		equationsFolder.add(params, 'specularVisEquation', specularVisEquation).name('geometry').onChange(value => {
-			this.guiParams.specularVisEquation = value;
-			this.reCompileShader();
-		});
+		equationsFolder
+			.add(params, 'diffuseEquation', diffuseEquation)
+			.name('diffuse')
+			.onChange(value => {
+				this.guiParams.diffuseEquation = value;
+				this.reCompileShader();
+			});
+		equationsFolder
+			.add(params, 'specularFresnelEquation', specularFresnelEquation)
+			.name('fresnel')
+			.onChange(value => {
+				this.guiParams.specularFresnelEquation = value;
+				this.reCompileShader();
+			});
+		equationsFolder
+			.add(params, 'specularNDFEquation', specularNDFEquation)
+			.name('NDF')
+			.onChange(value => {
+				this.guiParams.specularNDFEquation = value;
+				this.reCompileShader();
+			});
+		equationsFolder
+			.add(params, 'specularVisEquation', specularVisEquation)
+			.name('geometry')
+			.onChange(value => {
+				this.guiParams.specularVisEquation = value;
+				this.reCompileShader();
+			});
 		equationsFolder.open();
 
 		const advanceFolder = gui.addFolder('Advance');
-		advanceFolder.add(params, 'enableCompensation')
+		advanceFolder
+			.add(params, 'enableCompensation')
 			.name('compensation')
 			.onChange(value => {
 				this.guiParams.enableCompensation = value;
 				this.reCompileShader();
 			});
-		advanceFolder.add(params, 'enableNormalAA')
-			.name('normalAA')
+		advanceFolder
+			.add(params, 'enableSpecularAA')
+			.name('specularAA')
 			.onChange(value => {
 				this.guiParams.enableNormalAA = value;
 				this.reCompileShader();
 			});
-		advanceFolder.add(params, 'specularAO', specularAOList).onChange(value => {
-				this.guiParams.specularAO = value;
+		// advanceFolder
+		// 	.add(params, 'specularAAThreshold', 0, 1)
+		// 	.name('sAAThreshold')
+		// 	.step(0.01)
+		// 	.onChange(value => {
+		// 		gltfScene.traverse(child => {
+		// 			if (child.isMesh) {
+		// 				child.material.uniforms.specularAAThreshold.value = value;
+		// 			}
+		// 		});
+		// 	});
+		advanceFolder
+			.add(params, 'specularAAVariance', 0, 1)
+			.name('sAAVariance')
+			.step(0.01)
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.specularAAVariance.value = value;
+					}
+				});
+			});
+		advanceFolder
+			.add(params, 'enableMSSpecularAO')
+			.name('msSpecularAO')
+			.onChange(value => {
+				this.guiParams.enableMSSpecularAO = value;
 				this.reCompileShader();
 			});
+		advanceFolder
+			.add(params, 'enableMSDiffuseAO')
+			.name('msDiffuseAO')
+			.onChange(value => {
+				this.guiParams.enableMSDiffuseAO = value;
+				this.reCompileShader();
+			});
+		advanceFolder.add(params, 'specularAO', specularAOList).onChange(value => {
+			this.guiParams.specularAO = value;
+			this.reCompileShader();
+		});
 		
 		const postFolder = gui.addFolder('Post-Processing');
 		postFolder.add(params, 'toneMapping', toneMappingList).onChange(value => {
@@ -340,9 +390,9 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(NORMAL_AA)/;
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(GEOMETRIC_SPECULAR_AA)|(MS_SPECULAR_AO)|(MS_DIFFUSE_AO)/;
 		Object.keys(defines).map(key => {
-			if(reg.test(key)){
+			if (reg.test(key)) {
 				delete defines[key];
 			}
 		});
@@ -350,8 +400,10 @@ export default class ModelViewer {
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
 		if (guiParams.enableCompensation) defines.ENERGY_COMPENSATION = 1;
-		if (guiParams.enableNormalAA) defines.NORMAL_AA = 1;
-		
+		if (guiParams.enableSpecularAA) defines.GEOMETRIC_SPECULAR_AA = 1;
+		if (guiParams.enableMSSpecularAO) defines.MS_SPECULAR_AO = 1;
+		if (guiParams.enableMSDiffuseAO) defines.MS_DIFFUSE_AO = 1;
+
 		defines[`DIFFUSE_${guiParams.diffuseEquation.toUpperCase()}`] = 1;
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;
@@ -367,7 +419,7 @@ export default class ModelViewer {
 				child.material.needsUpdate = true;
 			}
 		});
-		if(updateBG) this.background.material.needsUpdate = true;
+		if (updateBG) this.background.material.needsUpdate = true;
 	}
 
 	updateEnvironmentRotation(value) {
@@ -381,7 +433,7 @@ export default class ModelViewer {
 
 	update() {
 		this.updateEnvironmentRotation(this.envRotation);
-		if ( this.animationMixer ) this.animationMixer.update(this.clock.getDelta());
+		if (this.animationMixer) this.animationMixer.update(this.clock.getDelta());
 		this.renderer.render(this.scene, this.camera);
 	}
 }

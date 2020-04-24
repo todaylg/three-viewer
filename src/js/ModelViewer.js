@@ -235,6 +235,7 @@ export default class ModelViewer {
 			specularVisEquation: specularVisEquation[0],
 			// Advance
 			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
+			enableNormalAA: !!pbrDefaultDefines.NORMAL_AA,
 			specularAO: specularAOList[0],
 			// Post
 			toneMapping: toneMappingList[0]
@@ -318,6 +319,12 @@ export default class ModelViewer {
 				this.guiParams.enableCompensation = value;
 				this.reCompileShader();
 			});
+		advanceFolder.add(params, 'enableNormalAA')
+			.name('normalAA')
+			.onChange(value => {
+				this.guiParams.enableNormalAA = value;
+				this.reCompileShader();
+			});
 		advanceFolder.add(params, 'specularAO', specularAOList).onChange(value => {
 				this.guiParams.specularAO = value;
 				this.reCompileShader();
@@ -333,7 +340,7 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)/;
+		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(NORMAL_AA)/;
 		Object.keys(defines).map(key => {
 			if(reg.test(key)){
 				delete defines[key];
@@ -343,6 +350,8 @@ export default class ModelViewer {
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
 		if (guiParams.enableCompensation) defines.ENERGY_COMPENSATION = 1;
+		if (guiParams.enableNormalAA) defines.NORMAL_AA = 1;
+		
 		defines[`DIFFUSE_${guiParams.diffuseEquation.toUpperCase()}`] = 1;
 		defines[`F_${guiParams.specularFresnelEquation.toUpperCase()}`] = 1;
 		defines[`NDF_${guiParams.specularNDFEquation.toUpperCase()}`] = 1;

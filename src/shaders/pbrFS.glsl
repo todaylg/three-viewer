@@ -40,6 +40,7 @@ uniform vec2 uEnvironmentLodRange;
 #endif
 
 varying vec3 vNormal;
+varying vec3 vWorldNormal;
 #ifdef USE_TANGENT
     varying vec3 vTangent;
     varying vec3 vBitangent;
@@ -117,6 +118,11 @@ void main(){
     const float minRoughness = 0.001;
     float materialRoughness = max(minRoughness, roughnessVal);
 
+    #ifdef NORMAL_AA
+    // materialRoughness = adjustRoughness(materialRoughness, vNormal);
+    materialRoughness = normalFiltering(materialRoughness, geometryNormal);
+    #endif
+
     vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
 
     // IBL
@@ -131,17 +137,17 @@ void main(){
 	materialAO = (texture2D(aoMap, vUv2).r - 1.0) * aoMapIntensity + 1.0;
     #endif
     diffuseIBL *= uEnvBrightness * materialAO;
-
-    float energyCompensation = 1.0;
-    #ifdef ENERGY_COMPENSATION
-    energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
-    #endif
+   
     // Specular AO
     float aoSpec = 1.0;
     #ifdef SPECULAR_AO_MARMOSETCO
     aoSpec = occlusionHorizon(materialAO, normal, viewDir);
     #elif defined(SPECULAR_AO_SEBLAGARDE)
     aoSpec = computeSpecularAO(materialAO, prepCompute);
+    #endif
+    float energyCompensation = 1.0;
+    #ifdef ENERGY_COMPENSATION
+    energyCompensation = getEnergyCompensation(specularDFG, materialSpecular.g);
     #endif
     specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
 

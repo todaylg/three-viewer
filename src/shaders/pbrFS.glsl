@@ -122,7 +122,6 @@ void main(){
 
     #ifdef GEOMETRIC_SPECULAR_AA
     materialRoughness = normalFiltering(materialRoughness, geometryNormal);
-    // materialRoughness = normalFiltering(materialRoughness, normal);
     #endif
 
     vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
@@ -147,10 +146,10 @@ void main(){
     
     // Specular AO
     float aoSpec = 1.0;
-    #ifdef SPECULAR_AO_MARMOSETCO
-    aoSpec = occlusionHorizon(materialAO, normal, viewDir);
-    #elif defined(SPECULAR_AO_SEBLAGARDE)
+    #ifdef SPECULAR_AO_SEBLAGARDE
     aoSpec = computeSpecularAO(materialAO, prepCompute);
+    #elif defined(SPECULAR_AO_MARMOSETCO)
+    aoSpec = occlusionHorizon(materialAO, normal, viewDir);
     #endif
     float energyCompensation = 1.0;
     #ifdef ENERGY_COMPENSATION
@@ -158,11 +157,9 @@ void main(){
     #endif
     #ifdef MS_SPECULAR_AO
     multiBounceSpecularAO(materialAO, materialSpecular, specularIBL);
-    #else
-    specularIBL * aoSpec;
     #endif
 
-    specularIBL *= uEnvBrightness * energyCompensation;
+    specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
 
     // Light
     float attenuation, NoL;

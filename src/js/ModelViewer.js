@@ -17,7 +17,6 @@ import {
 	specularAOList
 } from '../const/config';
 import { pbrDefaultDefines, pbrDefaultUniforms } from '../const/defaultParams';
-console.log(pbrDefaultUniforms);
 // Utils
 import { adjustCameraByBox, adjustSunLightByBox } from './ThreeUtils';
 import { isMobile } from './Utils';
@@ -336,7 +335,7 @@ export default class ModelViewer {
 			.add(params, 'enableSpecularAA')
 			.name('specularAA')
 			.onChange(value => {
-				this.guiParams.enableNormalAA = value;
+				this.guiParams.enableSpecularAA = value;
 				this.reCompileShader();
 			});
 		// advanceFolder

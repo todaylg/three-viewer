@@ -2,7 +2,6 @@ float getEnergyCompensation(vec3 dfg, float f0) {
    return 1.0 + f0 * (1.0 / dfg.y - 1.0);
 }
 
-// SpecularAO
 // http://marmosetco.tumblr.com/post/81245981087
 float occlusionHorizon(float ao, vec3 normal, vec3 viewDir) {
     float d = dot(normal, viewDir) + ao;
@@ -16,7 +15,6 @@ float computeSpecularAO(float ao, vec3 precomputeLight) {
     return clamp(pow(NoV + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao, 0.0, 1.0);
 }
 
-// MultiBounceAO
 /**
  * Returns a color ambient occlusion based on a pre-computed visibility term.
  * The albedo term is meant to be the diffuse color or f0 for the diffuse and
@@ -39,7 +37,6 @@ void multiBounceSpecularAO(float visibility, const vec3 albedo, inout vec3 color
     color *= gtaoMultiBounce(visibility, albedo);
 }
 
-// Todo
 float normalFiltering(float perceptualRoughness, const vec3 geometricNormal) {
     // Kaplanyan 2016, "Stable specular highlights"
     // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"

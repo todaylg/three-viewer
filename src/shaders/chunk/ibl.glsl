@@ -39,6 +39,16 @@ vec3 prefilterEnvMap(float rLinear, vec3 R) {
 	#endif
 }
 
+// Anisotropic
+vec3 computeAnisotropicBentNormal(const in vec3 normal, const in vec3 viewDir, const in float roughness, const in vec3 anisotropicT, const in vec3 anisotropicB, const in float anisotropy) {
+    vec3 anisotropyDirection = anisotropy >= 0.0 ? anisotropicB : anisotropicT;
+    vec3 anisotropicTangent = cross(anisotropyDirection, viewDir);
+    vec3 anisotropicNormal = cross(anisotropicTangent, anisotropyDirection);
+    float bendFactor = abs(anisotropy) * clamp(5.0 * roughness, 0.0, 1.0);
+    vec3  bentNormal = normalize(mix(normal, anisotropicNormal, bendFactor));
+    return bentNormal;
+}
+
 // From Sebastien Lagarde Moving Frostbite to PBR page 69
 // We have a better approximation of the off specular peak
 // but due to the other approximations we found this one performs better.

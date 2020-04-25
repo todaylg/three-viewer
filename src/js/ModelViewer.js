@@ -14,7 +14,8 @@ import {
 	specularFresnelEquation,
 	specularVisEquation,
 	toneMappingList,
-	specularAOList
+	specularAOList,
+	panelDefinesRegs
 } from '../const/config';
 import { pbrDefaultDefines, pbrDefaultUniforms } from '../const/defaultParams';
 // Utils
@@ -228,11 +229,15 @@ export default class ModelViewer {
 			specularFresnelEquation: specularFresnelEquation[0],
 			specularNDFEquation: specularNDFEquation[0],
 			specularVisEquation: specularVisEquation[0],
+			// Anisotropy
+			enableAnisotropy: !!pbrDefaultDefines.ENABLE_ANISOTROPY,
+			anisotropyFactor: pbrDefaultUniforms.uAnisotropyFactor.value,
+			anisotropyRotation: pbrDefaultUniforms.uAnisotropyRotation.value,
 			// Advance
 			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
 			enableSpecularAA: !!pbrDefaultDefines.GEOMETRIC_SPECULAR_AA,
-			specularAAVariance: pbrDefaultUniforms.specularAAVariance.value,
-			specularAAThreshold: pbrDefaultUniforms.specularAAThreshold.value,
+			specularAAVariance: pbrDefaultUniforms.uSpecularAAVariance.value,
+			specularAAThreshold: pbrDefaultUniforms.uSpecularAAThreshold.value,
 			specularAO: specularAOList[0],
 			enableMSSpecularAO: !!pbrDefaultDefines.MS_SPECULAR_AO,
 			enableMSDiffuseAO: !!pbrDefaultDefines.MS_DIFFUSE_AO,
@@ -292,6 +297,7 @@ export default class ModelViewer {
 			});
 		pbrFolder.open();
 
+		// Equations
 		const equationsFolder = gui.addFolder('Equations');
 		equationsFolder
 			.add(params, 'diffuseEquation', diffuseEquation)
@@ -323,6 +329,39 @@ export default class ModelViewer {
 			});
 		equationsFolder.open();
 
+		// Anisotropy
+		let anisotropyFolader = gui.addFolder('Anisotropy');
+		anisotropyFolader
+			.add(params, 'enableAnisotropy')
+			.name('enable')
+			.onChange(value => {
+				this.guiParams.enableAnisotropy = value;
+				this.reCompileShader();
+			});
+		anisotropyFolader
+			.add(params, 'anisotropyRotation', -3.14, 3.14)
+			.step(0.01)
+			.name('rotation')
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.uAnisotropyRotation.value = value;
+					}
+				});
+			});
+		anisotropyFolader
+			.add(params, 'anisotropyFactor', 0, 1)
+			.name('factor')
+			.step(0.01)
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.uAnisotropyFactor.value = value;
+					}
+				});
+			});
+
+		// Advance
 		const advanceFolder = gui.addFolder('Advance');
 		advanceFolder
 			.add(params, 'enableCompensation')
@@ -345,7 +384,7 @@ export default class ModelViewer {
 		// 	.onChange(value => {
 		// 		gltfScene.traverse(child => {
 		// 			if (child.isMesh) {
-		// 				child.material.uniforms.specularAAThreshold.value = value;
+		// 				child.material.uniforms.uSpecularAAThreshold.value = value;
 		// 			}
 		// 		});
 		// 	});
@@ -356,7 +395,7 @@ export default class ModelViewer {
 			.onChange(value => {
 				gltfScene.traverse(child => {
 					if (child.isMesh) {
-						child.material.uniforms.specularAAVariance.value = value;
+						child.material.uniforms.uSpecularAAVariance.value = value;
 					}
 				});
 			});
@@ -378,7 +417,8 @@ export default class ModelViewer {
 			this.guiParams.specularAO = value;
 			this.reCompileShader();
 		});
-		
+
+		// Post-Processing
 		const postFolder = gui.addFolder('Post-Processing');
 		postFolder.add(params, 'toneMapping', toneMappingList).onChange(value => {
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
@@ -389,7 +429,7 @@ export default class ModelViewer {
 	setDefinesFromGUI(defines) {
 		let guiParams = this.guiParams;
 		// Clean
-		let reg = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(GEOMETRIC_SPECULAR_AA)|(MS_SPECULAR_AO)|(MS_DIFFUSE_AO)/;
+		let reg = panelDefinesRegs;
 		Object.keys(defines).map(key => {
 			if (reg.test(key)) {
 				delete defines[key];
@@ -398,6 +438,7 @@ export default class ModelViewer {
 		// Reset
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
+		if (guiParams.enableAnisotropy) defines.ENABLE_ANISOTROPY = 1;
 		if (guiParams.enableCompensation) defines.ENERGY_COMPENSATION = 1;
 		if (guiParams.enableSpecularAA) defines.GEOMETRIC_SPECULAR_AA = 1;
 		if (guiParams.enableMSSpecularAO) defines.MS_SPECULAR_AO = 1;

@@ -9,9 +9,10 @@ class PBRMaterial extends THREE.ShaderMaterial {
 		this.copy(sourceMaterial);
 		
 		this.defines = Object.assign({}, pbrDefaultDefines);
-		// VertexTangents rely on (vertexTangents && normalMap) in threejs
+		// Tips: USE_TANGENT rely on (vertexTangents && normalMap) in threejs. But gltf spec only rely vertexTangents
 		// if(this.vertexTangents) this.defines.USE_TANGENT = 1;
-		// Copy method no include normalMapType
+		// Copy method no include normalMapType、vertexTangents
+		this.vertexTangents = sourceMaterial.vertexTangents;
 		this.normalMapType = sourceMaterial.normalMapType;
 		
 		// Uniforms
@@ -50,6 +51,11 @@ class PBRMaterial extends THREE.ShaderMaterial {
 			this.modelNormalMatrix.getNormalMatrix(mesh.matrixWorld);
 		};
 
+		// Extensions
+		this.extensions = {
+			derivatives: true,
+			shaderTextureLOD: true
+		};
 		this.needsUpdate = true;
 	}
 

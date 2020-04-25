@@ -47,11 +47,18 @@ const pbrDefaultUniforms = {
 	uBrightness:{
 		value: 1.0
 	},
-	specularAAVariance:{
+	uSpecularAAVariance:{
 		value: .1
 	},
-	specularAAThreshold:{
+	uSpecularAAThreshold:{
 		value: 1.0
+	},
+	// Anisotropy
+	uAnisotropyRotation: {
+		value: 0
+	},
+	uAnisotropyFactor: {
+		value: 0.5
 	},
 };
 
@@ -63,8 +70,9 @@ const pbrDefaultDefines = {
 	NDF_GGX: 1,
 	F_SCHLICK: 1,
 	V_SMITHJOINTAPPROX: 1,
-	SPECULAR_AO_SEBLAGARDE: 1,
+	// ENABLE_ANISOTROPY: 1,
 	// GEOMETRIC_SPECULAR_AA: 1
+	SPECULAR_AO_SEBLAGARDE: 1,
 	MS_SPECULAR_AO: 1,
 	MS_DIFFUSE_AO: 1
 };

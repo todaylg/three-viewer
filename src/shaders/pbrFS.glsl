@@ -6,8 +6,9 @@ uniform mat4 uEnvironmentTransform;
 mat3 environmentTransform;
 uniform float uEnvBrightness;
 uniform vec3 uEnvironmentSphericalHarmonics[9];
-
 uniform sampler2D uIntegrateBRDF;
+
+const float MIN_ROUGHNESS = 0.001;
 
 uniform vec3 diffuse;
 uniform vec3 emissive;
@@ -16,10 +17,14 @@ uniform float metalness;
 uniform float opacity;
 uniform vec2 uShadowDepthRange;
 
-uniform float specularAAThreshold;
-uniform float specularAAVariance;
+uniform float uSpecularAAThreshold;
+uniform float uSpecularAAVariance;
 
 varying vec3 vViewPosition;
+
+// Anisotropy
+uniform float uAnisotropyRotation;
+uniform float uAnisotropyFactor;
 
 #ifdef CUBEMAP_LOD
 uniform samplerCube envMap;
@@ -117,20 +122,33 @@ void main(){
     #endif
 
     // Roughness
-    const float minRoughness = 0.001;
-    float materialRoughness = max(minRoughness, roughnessVal);
-
+    float materialRoughness = max(MIN_ROUGHNESS, roughnessVal);
     #ifdef GEOMETRIC_SPECULAR_AA
     materialRoughness = normalFiltering(materialRoughness, geometryNormal);
     #endif
 
     vec3 prepCompute = precomputeLight(normal, viewDir, max(0.045, materialRoughness));
 
+    // Anisotropy
+    vec3 bentAnisotropicNormal = normal;
+    float anisotropy = uAnisotropyFactor;
+    #ifdef USE_TANGENT
+        #ifdef ENABLE_ANISOTROPY
+        vec3 anisotropicT = normalize(vTangent.xyz);
+        vec3 anisotropicB = normalize(vBitangent.xyz);
+        // Change direction
+        mat3 anisotropyRotationMatrix = rotationMatrix3(normal, uAnisotropyRotation);
+        anisotropicB *= anisotropyRotationMatrix;
+        anisotropicT *= anisotropyRotationMatrix;
+        bentAnisotropicNormal = computeAnisotropicBentNormal(normal, viewDir, materialRoughness, anisotropicT, anisotropicB, anisotropy);
+        #endif
+	#endif
+
     // IBL
     vec3 specularDFG = vec3(1.0);
     vec3 transformedNormal = environmentTransform * normal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
-    vec3 specularIBL = computeIBLSpecularUE4(normal, viewDir, materialRoughness, materialSpecular, vNormal, specularDFG);
+    vec3 specularIBL = computeIBLSpecularUE4(bentAnisotropicNormal, viewDir, materialRoughness, materialSpecular, vNormal, specularDFG);
     
     // Diffuse AO
     float materialAO = 1.0;
@@ -181,7 +199,17 @@ void main(){
 	    for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
             directionalLight = directionalLights[ i ];
             precomputeDirect(normal, viewDir, directionalLight, attenuation, lightDir, NoL);
+            // Todo: combine methods
+            #ifdef USE_TANGENT
+                #ifdef ENABLE_ANISOTROPY
+                anisotropicSurfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, anisotropicT, anisotropicB, anisotropy, lightDiffuse, lightSpecular, lighted);
+                #else
+                surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
+                #endif
+            #else
             surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
+            #endif
+            
             lightSpecular *= energyCompensation;
             // Shadow
             #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )

@@ -52,10 +52,10 @@ float normalFiltering(float perceptualRoughness, const vec3 geometricNormal) {
     vec3 du = dFdx(geometricNormal);
     vec3 dv = dFdy(geometricNormal);
 
-    float variance = specularAAVariance * (dot(du, du) + dot(dv, dv));
+    float variance = uSpecularAAVariance * (dot(du, du) + dot(dv, dv));
 
     float roughness = perceptualRoughness * perceptualRoughness;
-    float kernelRoughness = min(2.0 * variance, specularAAThreshold);
+    float kernelRoughness = min(2.0 * variance, uSpecularAAThreshold);
     float squareRoughness = saturate(roughness * roughness + kernelRoughness);
 
     return sqrt(sqrt(squareRoughness));

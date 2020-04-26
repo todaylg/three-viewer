@@ -24,6 +24,12 @@ float D_GGX(vec3 precomputeLight, float NoH){
     return a2 / (PI * d * d);	// 4 mul, 1 rcp
 }
 
+float D_GGX(float rougness, float NoH){
+    float a2 = rougness * rougness;
+    float d = (NoH * a2 - NoH) * NoH + 1.0;	// 2 mad
+    return a2 / (PI * d * d);	// 4 mul, 1 rcp
+}
+
 float Specular_D(vec3 precomputeLight, float NoH){
 #if defined(NDF_BLINNPHONG)
     return D_Blinn(precomputeLight, NoH);

@@ -236,7 +236,7 @@ export default class ModelViewer {
 			// ClearCoat
 			enableClearCoat: !!pbrDefaultDefines.ENABLE_CLEARCOAT,
 			clearCoatRoughness: pbrDefaultUniforms.uClearCoatRoughness.value,
-			clearCoat:  pbrDefaultUniforms.uClearCoat.value,
+			clearCoat: pbrDefaultUniforms.uClearCoat.value,
 			// Advance
 			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
 			enableSpecularAA: !!pbrDefaultDefines.GEOMETRIC_SPECULAR_AA,
@@ -374,18 +374,7 @@ export default class ModelViewer {
 				this.guiParams.enableClearCoat = value;
 				this.reCompileShader();
 			});
-			clearCoatFolader
-			.add(params, 'clearCoatRoughness', 0, 1)
-			.step(0.01)
-			.name('roughness')
-			.onChange(value => {
-				gltfScene.traverse(child => {
-					if (child.isMesh) {
-						child.material.uniforms.uClearCoatRoughness.value = value;
-					}
-				});
-			});
-			clearCoatFolader
+		clearCoatFolader
 			.add(params, 'clearCoat', 0, 1)
 			.step(0.01)
 			.name('clearCoat')
@@ -396,7 +385,18 @@ export default class ModelViewer {
 					}
 				});
 			});
-			clearCoatFolader.open();
+		clearCoatFolader
+			.add(params, 'clearCoatRoughness', 0, 1)
+			.step(0.01)
+			.name('roughness')
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.uClearCoatRoughness.value = value;
+					}
+				});
+			});
+
 		// Advance
 		const advanceFolder = gui.addFolder('Advance');
 		advanceFolder

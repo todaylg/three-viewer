@@ -195,6 +195,7 @@ void main(){
     #ifdef GEOMETRIC_SPECULAR_AA
     clearCoatPerceptualRoughness = normalFiltering(materialRoughness, geometryNormal);
     #endif
+    float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
     computeClearCoatIBL(clearCoatNoV, clearCoatNormal, clearCoatPerceptualRoughness, viewDir, vNormal, specularAO, diffuseIBL, specularIBL);
     #endif
 
@@ -205,6 +206,7 @@ void main(){
     vec3 lightDiffuse;
     vec3 resultLightSpecular;
     vec3 resultLightDiffuse;
+    float resultLightClearCoat = 0.;
     bool lighted;
     float shadow = 1.0;
     float shadowDistance;
@@ -228,8 +230,23 @@ void main(){
             #else
             surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
             #endif
-            
+            // ClearCoat
+            #ifdef ENABLE_CLEARCOAT
+            vec3 H = normalize(viewDir + lightDir);
+            // Todo: ClearCoat normalMap
+            float clearCoatNoH =  saturate(dot(clearCoatNormal, H));
+            float clearCoatLoH =  saturate(dot(lightDir, H));
+            float Fcc;
+            float clearCoat = clearCoatLobe(H, clearCoatNoH, clearCoatLoH, clearCoatRoughness, Fcc);
+            float clearCoatAttenuation = 1.0 - Fcc;
+
+            lightDiffuse *= clearCoatAttenuation;
+            lightSpecular *= energyCompensation * clearCoatAttenuation;
+            resultLightClearCoat += clearCoat;
+            #else
             lightSpecular *= energyCompensation;
+            #endif
+            
             // Shadow
             #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
             directionalLightShadow = directionalLightShadows[ i ];
@@ -258,7 +275,7 @@ void main(){
     vec3 resultDiffuse = diffuseIBL + resultLightDiffuse;
     vec3 resultSpecular = specularIBL + resultLightSpecular;
 
-    vec3 totalResult = resultDiffuse + resultSpecular + totalEmissiveRadiance;
+    vec3 totalResult = resultDiffuse + resultSpecular + totalEmissiveRadiance + resultLightClearCoat;
     vec4 frag = vec4(totalResult, diffuseColor.a);
     gl_FragColor = frag;
     #include <tonemapping_fragment>

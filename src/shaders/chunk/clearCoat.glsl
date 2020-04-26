@@ -12,3 +12,21 @@ void computeClearCoatIBL(float clearCoatNoV, vec3 clearCoatNormal, float clearCo
     vec3 clearCoatLobe = computeIBLSpecularUE4(specularDFG, clearCoatNormal, viewDir, clearCoatPerceptualRoughness, frontNormal);
     Fr += clearCoatLobe * (specularAO * uClearCoat);
 }
+
+float distributionClearCoat(float roughness, float NoH, const vec3 h) {
+    return D_GGX(roughness, NoH);
+}
+
+float visibilityClearCoat(float LoH) {
+    return Vis_Kelemen(LoH);
+}
+
+float clearCoatLobe(vec3 h, float clearCoatNoH, float clearCoatLoH, float clearCoatRoughness, out float Fcc){
+    // clear coat specular lobe
+    float D = distributionClearCoat(clearCoatRoughness, clearCoatNoH, h);
+    float V = visibilityClearCoat(clearCoatLoH);
+    float F = F_Schlick(clearCoatLoH, 0.04, 1.0) * uClearCoat; // fix IOR to 1.5
+
+    Fcc = F;
+    return D * V * F;
+}

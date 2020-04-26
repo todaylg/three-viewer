@@ -233,6 +233,10 @@ export default class ModelViewer {
 			enableAnisotropy: !!pbrDefaultDefines.ENABLE_ANISOTROPY,
 			anisotropyFactor: pbrDefaultUniforms.uAnisotropyFactor.value,
 			anisotropyRotation: pbrDefaultUniforms.uAnisotropyRotation.value,
+			// ClearCoat
+			enableClearCoat: !!pbrDefaultDefines.ENABLE_CLEARCOAT,
+			clearCoatRoughness: pbrDefaultUniforms.uClearCoatRoughness.value,
+			clearCoat:  pbrDefaultUniforms.uClearCoat.value,
 			// Advance
 			enableCompensation: !!pbrDefaultDefines.ENERGY_COMPENSATION,
 			enableSpecularAA: !!pbrDefaultDefines.GEOMETRIC_SPECULAR_AA,
@@ -361,6 +365,38 @@ export default class ModelViewer {
 				});
 			});
 
+		// ClearCoat
+		let clearCoatFolader = gui.addFolder('ClearCoat');
+		clearCoatFolader
+			.add(params, 'enableClearCoat')
+			.name('enable')
+			.onChange(value => {
+				this.guiParams.enableClearCoat = value;
+				this.reCompileShader();
+			});
+			clearCoatFolader
+			.add(params, 'clearCoatRoughness', 0, 1)
+			.step(0.01)
+			.name('roughness')
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.uClearCoatRoughness.value = value;
+					}
+				});
+			});
+			clearCoatFolader
+			.add(params, 'clearCoat', 0, 1)
+			.step(0.01)
+			.name('clearCoat')
+			.onChange(value => {
+				gltfScene.traverse(child => {
+					if (child.isMesh) {
+						child.material.uniforms.uClearCoat.value = value;
+					}
+				});
+			});
+			clearCoatFolader.open();
 		// Advance
 		const advanceFolder = gui.addFolder('Advance');
 		advanceFolder
@@ -439,6 +475,7 @@ export default class ModelViewer {
 		if (guiParams.enableIBL) defines.ENABLE_IBL = 1;
 		if (guiParams.enableLight) defines.ENABLE_LIGHT = 1;
 		if (guiParams.enableAnisotropy) defines.ENABLE_ANISOTROPY = 1;
+		if (guiParams.enableClearCoat) defines.ENABLE_CLEARCOAT = 1;
 		if (guiParams.enableCompensation) defines.ENERGY_COMPENSATION = 1;
 		if (guiParams.enableSpecularAA) defines.GEOMETRIC_SPECULAR_AA = 1;
 		if (guiParams.enableMSSpecularAO) defines.MS_SPECULAR_AO = 1;

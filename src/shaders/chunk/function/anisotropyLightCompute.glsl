@@ -42,7 +42,7 @@ vec3 anisotropicLobe(vec3 precomputeGGX, vec3 H, vec3 viewDir, vec3 lightDir, fl
     // Specular anisotropic BRDF
     float D = D_GGX_Anisotropic(at, ab, ToH, BoH, NoH);
     float V = V_SmithGGXCorrelated_Anisotropic(at, ab, ToV, BoV, ToL, BoL, NoV, NoL);
-    vec3 F = F_Schlick(VoH, specular, f90);
+    vec3 F = Specular_F(VoH, specular, f90);
 
     return (D * V) * F;
 }

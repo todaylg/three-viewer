@@ -25,7 +25,7 @@ const toneMappingList = ['ACESFilmic', 'Linear', 'Reinhard', 'Uncharted2', 'Cine
 
 const specularAOList = ['Seblagarde', 'Marmosetco', 'None'];
 
-const panelDefinesRegs = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENABLE_ANISOTROPY)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(GEOMETRIC_SPECULAR_AA)|(MS_SPECULAR_AO)|(MS_DIFFUSE_AO)/;
+const panelDefinesRegs = /(ENABLE_IBL)|(ENABLE_LIGHT)|(ENABLE_ANISOTROPY)|(ENABLE_CLEARCOAT)|(ENERGY_COMPENSATION)|(DIFFUSE_*)|(F_*)|(NDF_*)|(V_*)|(SPECULAR_AO_*)|(GEOMETRIC_SPECULAR_AA)|(MS_SPECULAR_AO)|(MS_DIFFUSE_AO)/;
 
 export {
 	envMapPath,

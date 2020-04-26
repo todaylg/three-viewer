@@ -60,6 +60,13 @@ const pbrDefaultUniforms = {
 	uAnisotropyFactor: {
 		value: 0.5
 	},
+	// ClearCoat
+	uClearCoatRoughness: {
+		value: 0.5
+	},
+	uClearCoat: {
+		value: 0.5
+	},
 };
 
 const pbrDefaultDefines = {
@@ -71,6 +78,7 @@ const pbrDefaultDefines = {
 	F_SCHLICK: 1,
 	V_SMITHJOINTAPPROX: 1,
 	// ENABLE_ANISOTROPY: 1,
+	// ENABLE_CLEARCOAT: 1,
 	// GEOMETRIC_SPECULAR_AA: 1
 	SPECULAR_AO_SEBLAGARDE: 1,
 	MS_SPECULAR_AO: 1,

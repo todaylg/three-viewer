@@ -6,12 +6,11 @@
     #preImport <panoramaSampler>
 #endif
 
-vec3 integrateBRDF(vec3 specular, float roughness, float NoV, inout vec3 specularDFG) {
+vec3 integrateBRDF(vec3 materialSpecular, float roughness, float NoV) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
     float a = (rgba[1] * 65280.0 + rgba[0] * 255.0) / 65535.0;
     float b = (rgba[3] * 65280.0 + rgba[2] * 255.0) / 65535.0;
-    specularDFG = (1.-specular) * a + specular * b;
-    return specularDFG;
+    return (1.-materialSpecular) * a + materialSpecular * b;
 }
 
 // frostbite, lagarde paper p67
@@ -40,7 +39,7 @@ vec3 prefilterEnvMap(float rLinear, vec3 R) {
 }
 
 // Anisotropic
-vec3 computeAnisotropicBentNormal(const in vec3 normal, const in vec3 viewDir, const in float roughness, const in vec3 anisotropicT, const in vec3 anisotropicB, const in float anisotropy) {
+vec3 computeAnisotropicBentNormal(vec3 normal, vec3 viewDir, float roughness, vec3 anisotropicT, vec3 anisotropicB, float anisotropy) {
     vec3 anisotropyDirection = anisotropy >= 0.0 ? anisotropicB : anisotropicT;
     vec3 anisotropicTangent = cross(anisotropyDirection, viewDir);
     vec3 anisotropicNormal = cross(anisotropicTangent, anisotropyDirection);
@@ -73,8 +72,6 @@ vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 
     return prefilteredColor;
 }
 
-vec3 computeIBLSpecularUE4(vec3 normal, vec3 viewDir, float roughness, vec3 specular, vec3 frontNormal, inout vec3 specularDFG) {
-    float NoV = dot(normal, viewDir);
-    vec3 brdfLUT = integrateBRDF(specular, roughness, NoV, specularDFG);
-    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * brdfLUT;
+vec3 computeIBLSpecularUE4(vec3 specularDFG, vec3 normal, vec3 viewDir, float roughness, vec3 frontNormal) {
+    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * specularDFG;
 }

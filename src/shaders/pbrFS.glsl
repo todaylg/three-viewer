@@ -26,6 +26,10 @@ varying vec3 vViewPosition;
 uniform float uAnisotropyRotation;
 uniform float uAnisotropyFactor;
 
+// ClearCoat
+uniform float uClearCoat;
+uniform float uClearCoatRoughness;
+
 #ifdef CUBEMAP_LOD
 uniform samplerCube envMap;
 #endif
@@ -73,6 +77,7 @@ varying vec3 vWorldNormal;
 #preImport <ibl>
 #preImport <brdf>
 #preImport <advance>
+#preImport <clearCoat>
 
 void main(){
     vec3 viewDir = -normalize(vViewPosition);
@@ -122,7 +127,7 @@ void main(){
     #endif
 
     // Roughness
-    float materialRoughness = max(MIN_ROUGHNESS, roughnessVal);
+    float materialRoughness = clamp(roughnessVal, MIN_ROUGHNESS, 1.0);
     #ifdef GEOMETRIC_SPECULAR_AA
     materialRoughness = normalFiltering(materialRoughness, geometryNormal);
     #endif
@@ -145,10 +150,11 @@ void main(){
 	#endif
 
     // IBL
-    vec3 specularDFG = vec3(1.0);
-    vec3 transformedNormal = environmentTransform * normal;
+    float NoV = dot(bentAnisotropicNormal, viewDir);
+    vec3 transformedNormal = environmentTransform * bentAnisotropicNormal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
-    vec3 specularIBL = computeIBLSpecularUE4(bentAnisotropicNormal, viewDir, materialRoughness, materialSpecular, vNormal, specularDFG);
+    vec3 specularDFG = integrateBRDF(materialSpecular, materialRoughness, NoV);
+    vec3 specularIBL = computeIBLSpecularUE4(specularDFG, bentAnisotropicNormal, viewDir, materialRoughness, vNormal);
     
     // Diffuse AO
     float materialAO = 1.0;
@@ -163,11 +169,11 @@ void main(){
     diffuseIBL *= uEnvBrightness;
     
     // Specular AO
-    float aoSpec = 1.0;
+    float specularAO = 1.0;
     #ifdef SPECULAR_AO_SEBLAGARDE
-    aoSpec = computeSpecularAO(materialAO, prepCompute);
+    specularAO = computeSpecularAO(materialAO, prepCompute);
     #elif defined(SPECULAR_AO_MARMOSETCO)
-    aoSpec = occlusionHorizon(materialAO, normal, viewDir);
+    specularAO = occlusionHorizon(materialAO, normal, viewDir);
     #endif
     float energyCompensation = 1.0;
     #ifdef ENERGY_COMPENSATION
@@ -177,7 +183,20 @@ void main(){
     multiBounceSpecularAO(materialAO, materialSpecular, specularIBL);
     #endif
 
-    specularIBL *= uEnvBrightness * aoSpec * energyCompensation;
+    specularIBL *= uEnvBrightness * specularAO * energyCompensation;
+
+    // ClearCoat IBL
+    #ifdef ENABLE_CLEARCOAT
+    // Todo: ClearCoat normalMap
+    // Use the geometric normal for the clear coat layer
+    float clearCoatNoV = prepCompute.z;
+    vec3 clearCoatNormal = geometryNormal;
+    float clearCoatPerceptualRoughness = clamp(uClearCoatRoughness, MIN_ROUGHNESS, 1.0);
+    #ifdef GEOMETRIC_SPECULAR_AA
+    clearCoatPerceptualRoughness = normalFiltering(materialRoughness, geometryNormal);
+    #endif
+    computeClearCoatIBL(clearCoatNoV, clearCoatNormal, clearCoatPerceptualRoughness, viewDir, vNormal, specularAO, diffuseIBL, specularIBL);
+    #endif
 
     // Light
     float attenuation, NoL;

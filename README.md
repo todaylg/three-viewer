@@ -54,10 +54,10 @@ npm run build
 
 - [x] Fix energy loss in specular reflectance
   
+- [x] Anisotropy(GGX)
+  
 - [ ] Clearcoat
 
-- [ ] Anisotropy(GGX)
-  
 - [ ] Sheen
 
 - [ ] Spot/Point Light and Shadow

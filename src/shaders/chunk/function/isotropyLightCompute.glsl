@@ -43,6 +43,10 @@ vec3 F_Schlick(float VoH, vec3 f0, float f90){
     return f0 + (vec3(f90) - f0) * pow5(1.0 - VoH);
 }
 
+float F_Schlick(float VoH, float f0, float f90) {
+    return f0 + (f90 - f0) * pow5(1.0 - VoH);
+}
+
 // [Cook-Torrance 1982]
 vec3 F_CookTorrance(float VoH, vec3 f0, float f90){
     vec3 sqrtSpec = sqrt(f0);
@@ -60,7 +64,7 @@ vec3 F_None(vec3 f0){
     return f0;
 }
 
-vec3 Specular_F(float VoH, vec3 f0, float f90){
+vec3 Specular_F(float VoH, vec3 f0, float f90) {
 #if defined(F_SCHLICK)
     return F_Schlick(VoH, f0, f90);
 #elif defined(F_COOKTORRANCE)

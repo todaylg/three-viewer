@@ -2,8 +2,7 @@
 // https://github.com/cedricpinson/osgjs
 // https://google.github.io/filament/Filament.html
 
-uniform mat4 uEnvironmentTransform;
-mat3 environmentTransform;
+uniform mat3 uEnvironmentTransform;
 uniform float uEnvBrightness;
 uniform vec3 uEnvironmentSphericalHarmonics[9];
 uniform sampler2D uIntegrateBRDF;
@@ -81,7 +80,6 @@ varying vec3 vWorldNormal;
 
 void main(){
     vec3 viewDir = -normalize(vViewPosition);
-    environmentTransform = getEnvironmentTransfrom(uEnvironmentTransform);
 
     vec4 diffuseColor = vec4(diffuse, opacity);
     vec3 totalEmissiveRadiance = emissive;
@@ -151,10 +149,10 @@ void main(){
 
     // IBL
     float NoV = dot(bentAnisotropicNormal, viewDir);
-    vec3 transformedNormal = environmentTransform * bentAnisotropicNormal;
+    vec3 transformedNormal = uEnvironmentTransform * bentAnisotropicNormal;
     vec3 diffuseIBL = materialDiffuse * computeDiffuseSPH(transformedNormal, uEnvironmentSphericalHarmonics);
     vec3 specularDFG = integrateBRDF(materialSpecular, materialRoughness, NoV);
-    vec3 specularIBL = computeIBLSpecularUE4(specularDFG, bentAnisotropicNormal, viewDir, materialRoughness, vNormal);
+    vec3 specularIBL = computeIBLSpecularUE4(specularDFG, bentAnisotropicNormal, viewDir, materialRoughness);
     
     // Diffuse AO
     float materialAO = 1.0;
@@ -196,7 +194,7 @@ void main(){
     clearCoatPerceptualRoughness = normalFiltering(materialRoughness, geometryNormal);
     #endif
     float clearCoatRoughness = clearCoatPerceptualRoughness * clearCoatPerceptualRoughness;
-    computeClearCoatIBL(clearCoatNoV, clearCoatNormal, clearCoatPerceptualRoughness, viewDir, vNormal, specularAO, diffuseIBL, specularIBL);
+    computeClearCoatIBL(clearCoatNoV, clearCoatNormal, clearCoatPerceptualRoughness, viewDir, specularAO, diffuseIBL, specularIBL);
     #endif
 
     // Light

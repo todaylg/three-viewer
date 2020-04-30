@@ -60,18 +60,16 @@ vec3 getSpecularDominantDir(vec3 N, vec3 R, float realRoughness) {
     return mix(N, R, lerpFactor);
 }
 
-vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness, vec3 frontNormal) {
+vec3 getPrefilteredEnvMapColor(vec3 normal, vec3 viewDir, float roughness) {
     vec3 R = reflect(-viewDir, normal);
     // From Sebastien Lagarde Moving Frostbite to PBR page 69
-    R = getSpecularDominantDir(normal, R, roughness * roughness);
+    vec3 dominantR = getSpecularDominantDir(normal, R, roughness * roughness);
+    vec3 dir = uEnvironmentTransform * dominantR;
+    vec3 prefilteredColor = prefilterEnvMap(roughness, dir);
 
-    vec3 prefilteredColor = prefilterEnvMap(roughness, environmentTransform * R);
-
-    float factor = clamp(1.0 + dot(R, frontNormal), 0.0, 1.0);
-    prefilteredColor *= factor * factor;
     return prefilteredColor;
 }
 
-vec3 computeIBLSpecularUE4(vec3 specularDFG, vec3 normal, vec3 viewDir, float roughness, vec3 frontNormal) {
-    return getPrefilteredEnvMapColor(normal, viewDir, roughness, frontNormal) * specularDFG;
+vec3 computeIBLSpecularUE4(vec3 specularDFG, vec3 normal, vec3 viewDir, float roughness) {
+    return getPrefilteredEnvMapColor(normal, viewDir, roughness) * specularDFG;
 }

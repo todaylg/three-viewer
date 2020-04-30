@@ -36,8 +36,14 @@ export default class ModelViewer {
 		this.isMobile = isMobile();
 		// Env Rotation
 		this.envRotation = 0;
-		this.envRotationMat = { value: new THREE.Matrix4().makeRotationY(this.envRotation) };
+		this.envRotationFromPanel = new THREE.Matrix4().makeRotationY(this.envRotation);
+		this.envRotationMat4 = new THREE.Matrix4().copy(this.envRotationFromPanel);
+		this.envRotationMat = { value: new THREE.Matrix3().setFromMatrix4(this.envRotationMat4) };
+		this.envRotationMatBG = { value: new THREE.Matrix3().copy(this.envRotationMat.value) };
 		this.envBrightness = { value: 1.0 };
+
+		this.cameraRotationMatrix = new THREE.Matrix4();
+		this.sunLightPanelRotateMat = new THREE.Matrix4();
 
 		this.renderer = mainScene.renderer;
 		this.renderer.toneMapping = THREE[`${toneMappingList[0]}ToneMapping`];
@@ -75,7 +81,7 @@ export default class ModelViewer {
 				},
 				500
 			);
-			this.background.material.uniforms.uEnvironmentTransform = this.envRotationMat;
+			this.background.material.uniforms.uEnvironmentTransform = this.envRotationMatBG;
 		} else {
 			// Update new background
 			this.background.material.uniforms.envMap.value = backgroundEnv.texture;
@@ -501,10 +507,16 @@ export default class ModelViewer {
 
 	updateEnvironmentRotation(value) {
 		// Get panel rotation
-		this.envRotationMat.value.makeRotationY(value);
+		this.envRotationFromPanel.makeRotationY(value);
+		// Sync camera roatation
+		this.cameraRotationMatrix.makeRotationFromQuaternion(this.camera.quaternion);
+		this.envRotationMat4.multiplyMatrices(this.envRotationFromPanel, this.cameraRotationMatrix);
+		this.envRotationMat.value.setFromMatrix4(this.envRotationMat4);
+		this.envRotationMatBG.value.setFromMatrix4(this.envRotationFromPanel);
 		// Direction compute by position
 		let resultSunlight = this.sunLightStartPos.clone();
-		resultSunlight.applyMatrix4(this.envRotationMat.value);
+		this.sunLightPanelRotateMat.getInverse(this.envRotationFromPanel);
+		resultSunlight.applyMatrix4(this.sunLightPanelRotateMat);
 		this.sunLight.position.copy(resultSunlight);
 	}
 

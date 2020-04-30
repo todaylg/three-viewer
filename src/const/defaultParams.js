@@ -24,7 +24,7 @@ const bgDefaultUniforms = {
 		value: 1.0
 	},
 	uEnvironmentTransform: {
-		value: new THREE.Matrix4()
+		value: new THREE.Matrix3()
 	},
 }
 
@@ -42,7 +42,7 @@ const pbrDefaultUniforms = {
 		value: new THREE.Color(0x000000)
 	},
 	uEnvironmentTransform: {
-		value: new THREE.Matrix4()
+		value: new THREE.Matrix3()
 	},
 	uBrightness:{
 		value: 1.0

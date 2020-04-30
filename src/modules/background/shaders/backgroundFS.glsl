@@ -1,17 +1,9 @@
 uniform samplerCube envMap;
-uniform mat4 uEnvironmentTransform;
+uniform mat3 uEnvironmentTransform;
 uniform float uEnvBrightness;
 uniform vec2 uEnvironmentSize;
 
 varying vec3 vViewNormal;
-
-mat3 getEnvironmentTransfrom(mat4 transform) {
-    vec3 x = vec3(transform[0][0], transform[1][0], transform[2][0]);
-    vec3 y = vec3(transform[0][1], transform[1][1], transform[2][1]);
-    vec3 z = vec3(transform[0][2], transform[1][2], transform[2][2]);
-    mat3 m = mat3(x,y,z);
-    return m;
-}
 
 vec3 cubemapSeamlessFixDirection(const in vec3 direction, const in float scale ){
     vec3 dir = direction;
@@ -40,7 +32,7 @@ vec4 textureCubeFixed(const in samplerCube tex, const in vec3 direction){
 
 void main(){
     vec3 direction = normalize(vViewNormal);
-    direction = getEnvironmentTransfrom(uEnvironmentTransform) * direction;
+    direction = uEnvironmentTransform * direction;
     vec4 samplerColor = uEnvBrightness * textureCubeFixed(envMap, direction);
     
     gl_FragColor = samplerColor;

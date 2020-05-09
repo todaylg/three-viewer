@@ -57,9 +57,9 @@ export default {
 		initEvent() {
 			let _this = this;
 			let loader = new Loader();
-			let inputEle1 = document.body.querySelector('#file-input');
+			let inputEle = document.body.querySelector('#file-input');
 			let dropEl = document.body.querySelector('.dropzone');
-			const dropCtrl = new SimpleDropzone(dropEl, inputEle1);
+			const dropCtrl = new SimpleDropzone(dropEl, inputEle);
 			dropCtrl.on('drop', ({ files }) =>
 				loader.importGLTF(files).then(gltf => {
 					this.initScene(gltf);

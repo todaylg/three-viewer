@@ -26,4 +26,14 @@ function isMobile() {
 	return e || /Android|webOS|BlackBerry|Opera Mini|Opera Mobi|IEMobile/i.test(navigator.userAgent);
 }
 
-export { getEleWidth, getEleHeight, isMobile };
+function debounce(callback, duration) {
+	let timer;
+	return function(event) {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			callback(event);
+		}, duration);
+	};
+}
+
+export { getEleWidth, getEleHeight, isMobile, debounce };

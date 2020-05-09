@@ -2,9 +2,9 @@ import * as THREE from 'three';
 // Control
 import { OrbitControls } from 'LIB/threejs/controls/OrbitControls';
 // Environment
-import { Environment } from '../modules/environment/Environment';
+import { Environment } from 'MODULES/environment/Environment';
 import { PBRMaterial } from './PBRMaterial';
-import { Background } from '../modules/background/Background';
+import { Background } from 'MODULES/background/Background';
 import Program from './Program';
 import {
 	envMapList,
@@ -21,6 +21,8 @@ import { pbrDefaultDefines, pbrDefaultUniforms } from '../const/defaultParams';
 // Utils
 import { adjustCameraByBox, adjustSunLightByBox } from './ThreeUtils';
 import { isMobile } from './Utils';
+// Post Procssing
+import { EffectComposer, RenderPass, EffectPass, NormalPass, DepthEffect, SSAOEffect, BlendFunction } from "MODULES/postprocessing/";
 
 // Test
 import { GUI } from 'LIB/threejs/libs/dat.gui.module.js';
@@ -54,8 +56,11 @@ export default class ModelViewer {
 		this.height = mainScene.height;
 		this.callBack = callBack;
 
+		this.initEnableSSAO = false;
+
 		this.control = new OrbitControls(this.camera, this.container);
 		this.initScene();
+		this.initPostProcessing();
 	}
 
 	loadEnvMap(envMapName = envMapList[0]) {
@@ -219,6 +224,48 @@ export default class ModelViewer {
 		);
 	}
 
+	initPostProcessing(){
+		let {scene, camera, renderer} = this;
+		const renderPass = this.renderPass = new RenderPass(scene, camera);
+		const normalPass = this.normalPass = new NormalPass(scene, camera);
+		const depthEffect = new DepthEffect({
+			blendFunction: BlendFunction.SKIP
+		});
+		const ssaoEffect = this.ssaoEffect = new SSAOEffect(camera, normalPass.renderTarget.texture, {
+			// For Test
+			blendFunction: BlendFunction.MULTIPLY,
+			samples: 11,
+			rings: 4,
+			distanceThreshold: 0.02, // Render up to a distance of ~20 world units
+			distanceFalloff: 0.0025, // with an additional ~2.5 units of falloff.
+			rangeThreshold: 0.0003, // Occlusion proximity of ~0.3 world units
+			rangeFalloff: 0.0001, // with ~0.1 units of falloff.
+			luminanceInfluence: 0.7,
+			radius: 30,
+			scale: 1.0,
+			bias: 0.05
+		});
+		const ssaoEffectPass = this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect);
+		// No need gamma again
+		ssaoEffectPass.encodeOutput = false;
+
+		const composer = this.composer = new EffectComposer(renderer, {
+			frameBufferType: THREE.HalfFloatType
+		});
+		
+		this.toggleSSAOEffect(this.initEnableSSAO);
+		
+		composer.addPass(renderPass);
+		composer.addPass(normalPass);
+		composer.addPass(ssaoEffectPass);
+	}
+
+	toggleSSAOEffect(enable){
+		this.ssaoEffectPass.enabled = enable;
+		this.ssaoEffectPass.renderToScreen = enable;
+		this.renderPass.renderToScreen = !enable;
+	}
+
 	initGUI() {
 		let gui = new GUI();
 		let gltfScene = this.gltfScene;
@@ -252,7 +299,8 @@ export default class ModelViewer {
 			enableMSSpecularAO: !!pbrDefaultDefines.MS_SPECULAR_AO,
 			enableMSDiffuseAO: !!pbrDefaultDefines.MS_DIFFUSE_AO,
 			// Post
-			toneMapping: toneMappingList[0]
+			toneMapping: toneMappingList[0],
+			enableSSAO: this.initEnableSSAO
 		});
 		// PBR
 		const pbrFolder = gui.addFolder('PBR');
@@ -466,6 +514,13 @@ export default class ModelViewer {
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
 			this.reCompileShader(true);
 		});
+		postFolder
+			.add(params, 'enableSSAO')
+			.name('SSAO')
+			.onChange(value => {
+				this.toggleSSAOEffect(value);
+			});
+		postFolder.open();
 	}
 
 	setDefinesFromGUI(defines) {
@@ -520,9 +575,19 @@ export default class ModelViewer {
 		this.sunLight.position.copy(resultSunlight);
 	}
 
+	resize(width, height) {
+		this.width = width;
+		this.height = height;
+		this.camera.aspect = this.width / this.height;
+		this.camera.updateProjectionMatrix();
+		this.composer.setSize(width, height);
+	}
+
 	update() {
+		let deltaTime = this.clock.getDelta();
 		this.updateEnvironmentRotation(this.envRotation);
-		if (this.animationMixer) this.animationMixer.update(this.clock.getDelta());
-		this.renderer.render(this.scene, this.camera);
+		if (this.animationMixer) this.animationMixer.update(deltaTime);
+		// this.renderer.render(this.scene, this.camera);
+		this.composer.render(deltaTime);
 	}
 }

@@ -45,16 +45,14 @@ export default class MainScene {
 	}
 
 	onWindowResize() {
+		if(!this.loaded) return;
 		this.width = getEleWidth(this.container);
 		this.height = getEleHeight(this.container);
-		this.camera.aspect = this.width / this.height;
-		this.camera.updateProjectionMatrix();
-		this.renderer.setPixelRatio(window.devicePixelRatio);
-		this.renderer.setSize(this.width, this.height);
+		this.modelViewer.resize(this.width, this.height);
 	}
 
-	animete() {
-		if(this.loaded) this.modelViewer.update();
+	animete(nowTime) {
+		if(this.loaded) this.modelViewer.update(nowTime);
 		requestAnimationFrame(this.animete.bind(this));
 	}
 }

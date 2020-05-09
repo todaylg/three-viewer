@@ -5,7 +5,7 @@ module.exports = {
 	chainWebpack: config => {
 		config.module
 			.rule('raw')
-			.test(/\.(glsl|fs|vs)$/)
+			.test(/\.(glsl|fs|vs|frag|vert)$/)
 			.use('raw-loader')
 			.loader('raw-loader')
 			.end();
@@ -33,7 +33,8 @@ module.exports = {
 			alias: {
 				'@': path.resolve(__dirname, './src'),
 				JS: path.resolve(__dirname, './src/js'),
-				LIB: path.resolve(__dirname, './src/libs')
+				LIB: path.resolve(__dirname, './src/libs'),
+				MODULES: path.resolve(__dirname, './src/modules'),
 			}
 		};
 	}

@@ -16,18 +16,24 @@ uniform float metalness;
 uniform float opacity;
 uniform vec2 uShadowDepthRange;
 
-uniform float uSpecularAAThreshold;
-uniform float uSpecularAAVariance;
-
 varying vec3 vViewPosition;
 
+#ifdef GEOMETRIC_SPECULAR_AA
+uniform float uSpecularAAThreshold;
+uniform float uSpecularAAVariance;
+#endif
+
 // Anisotropy
+#if defined(USE_TANGENT) && defined(ENABLE_ANISOTROPY)
 uniform float uAnisotropyRotation;
 uniform float uAnisotropyFactor;
+#endif
 
 // ClearCoat
+#ifdef ENABLE_CLEARCOAT
 uniform float uClearCoat;
 uniform float uClearCoatRoughness;
+#endif
 
 #ifdef CUBEMAP_LOD
 uniform samplerCube envMap;
@@ -134,9 +140,8 @@ void main(){
 
     // Anisotropy
     vec3 bentAnisotropicNormal = normal;
-    float anisotropy = uAnisotropyFactor;
-    #ifdef USE_TANGENT
-        #ifdef ENABLE_ANISOTROPY
+    #if defined(USE_TANGENT) && defined(ENABLE_ANISOTROPY)
+        float anisotropy = uAnisotropyFactor;
         vec3 anisotropicT = normalize(vTangent.xyz);
         vec3 anisotropicB = normalize(vBitangent.xyz);
         // Change direction
@@ -144,7 +149,6 @@ void main(){
         anisotropicB *= anisotropyRotationMatrix;
         anisotropicT *= anisotropyRotationMatrix;
         bentAnisotropicNormal = computeAnisotropicBentNormal(normal, viewDir, materialRoughness, anisotropicT, anisotropicB, anisotropy);
-        #endif
 	#endif
 
     // IBL
@@ -219,12 +223,8 @@ void main(){
             directionalLight = directionalLights[ i ];
             precomputeDirect(normal, viewDir, directionalLight, attenuation, lightDir, NoL);
             // Todo: combine methods
-            #ifdef USE_TANGENT
-                #ifdef ENABLE_ANISOTROPY
-                anisotropicSurfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, anisotropicT, anisotropicB, anisotropy, lightDiffuse, lightSpecular, lighted);
-                #else
-                surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
-                #endif
+            #if defined(USE_TANGENT) && defined(ENABLE_ANISOTROPY)
+            anisotropicSurfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, anisotropicT, anisotropicB, anisotropy, lightDiffuse, lightSpecular, lighted);
             #else
             surfaceShading(normal, viewDir, NoL, prepCompute, materialDiffuse, materialSpecular, attenuation, directionalLights[ i ].color, lightDir, materialF90, lightDiffuse, lightSpecular, lighted);
             #endif

@@ -13,6 +13,16 @@ export default class Loader {
 		})
 	}
 
+	loadGLTF(rootPath, fileName='scene.gltf'){
+		const loader = new GLTFLoader();
+		loader.setPath(rootPath);
+		return new Promise((resolve) => {
+			loader.load(fileName, gltf => {
+				resolve(gltf);
+			})
+		})
+	}
+	
 	importGLTF(fileMap) {
 		let rootFile, rootPath;
 		Array.from(fileMap).forEach(([path, file]) => {
@@ -55,15 +65,5 @@ export default class Loader {
 				reject
 			);
 		});
-	}
-
-	loadGLTF(rootPath, fileName='scene.gltf'){
-		const loader = new GLTFLoader();
-		loader.setPath(rootPath);
-		return new Promise((resolve) => {
-			loader.load(fileName, gltf => {
-				resolve(gltf);
-			})
-		})
 	}
 }

@@ -1,4 +1,5 @@
  // ClearCoat
+#ifdef ENABLE_CLEARCOAT
 void computeClearCoatIBL(float clearCoatNoV, vec3 clearCoatNormal, float clearCoatPerceptualRoughness, vec3 viewDir, float specularAO, inout vec3 Fd, inout vec3 Fr){
     // The clear coat layer assumes an IOR of 1.5 (4% reflectance)
     vec3 materialSpecular = vec3(0.04);
@@ -30,3 +31,4 @@ float clearCoatLobe(vec3 h, float clearCoatNoH, float clearCoatLoH, float clearC
     Fcc = F;
     return D * V * F;
 }
+#endif

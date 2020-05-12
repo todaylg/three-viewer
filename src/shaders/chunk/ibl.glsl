@@ -6,13 +6,16 @@
     #preImport <panoramaSampler>
 #endif
 
+#ifdef MOBILE
+    #preImport <integrateBRDFMobile>
+#else
 vec3 integrateBRDF(vec3 materialSpecular, float roughness, float NoV) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
     float a = (rgba[1] * 65280.0 + rgba[0] * 255.0) / 65535.0;
     float b = (rgba[3] * 65280.0 + rgba[2] * 255.0) / 65535.0;
     return (1.-materialSpecular) * a + materialSpecular * b;
 }
-
+#endif
 // frostbite, lagarde paper p67
 // http://www.frostbite.com/wp-content/uploads/2014/11/course_notes_moving_frostbite_to_pbr.pdf
 float linRoughnessToMipmap(float roughnessLinear){
@@ -39,6 +42,7 @@ vec3 prefilterEnvMap(float rLinear, vec3 R) {
 }
 
 // Anisotropic
+#if defined(USE_TANGENT) && defined(ENABLE_ANISOTROPY)
 vec3 computeAnisotropicBentNormal(vec3 normal, vec3 viewDir, float roughness, vec3 anisotropicT, vec3 anisotropicB, float anisotropy) {
     vec3 anisotropyDirection = anisotropy >= 0.0 ? anisotropicB : anisotropicT;
     vec3 anisotropicTangent = cross(anisotropyDirection, viewDir);
@@ -47,6 +51,7 @@ vec3 computeAnisotropicBentNormal(vec3 normal, vec3 viewDir, float roughness, ve
     vec3  bentNormal = normalize(mix(normal, anisotropicNormal, bendFactor));
     return bentNormal;
 }
+#endif
 
 // From Sebastien Lagarde Moving Frostbite to PBR page 69
 // We have a better approximation of the off specular peak

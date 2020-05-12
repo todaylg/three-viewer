@@ -20,7 +20,7 @@
 								<span>Upload</span>
 							</label>
 						</div>
-						<div class="uploadBtn" @click='loadDefaultMode'>
+						<div class="uploadBtn" @click='loadDefaultModel'>
 							<span>Defalut(3.5MB)</span>
 						</div>
 					</div>
@@ -45,7 +45,7 @@ export default {
 		this.initEvent();
 		// Dev
 		// document.querySelector("#wrapper").classList.remove("isLoading");
-		// this.loadDefaultMode();
+		// this.loadDefaultModel();
 	},
 	methods: {
 		initScene(gltf) {
@@ -67,7 +67,7 @@ export default {
 				})
 			);
 		},
-		loadDefaultMode(){
+		loadDefaultModel(){
 			let loader = new Loader();
 			this.openImportPage = false;
 			loader.loadGLTF('./assets/models/damagedHelmet/').then(gltf => {
@@ -85,6 +85,15 @@ body {
 	padding: 0;
 	box-sizing: border-box;
 	background: #000;
+}
+
+*{
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -khtml-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
 }
 
 #wrapper {

@@ -268,6 +268,7 @@ export default class ModelViewer {
 
 	initGUI() {
 		let gui = new GUI();
+		if(this.isMobile) gui.close();
 		let gltfScene = this.gltfScene;
 		let params = (this.guiParams = {
 			enableIBL: !!pbrDefaultDefines.ENABLE_IBL,
@@ -514,12 +515,15 @@ export default class ModelViewer {
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
 			this.reCompileShader(true);
 		});
-		postFolder
+		// Todo: Fix Mobile
+		if(!this.isMobile){
+			postFolder
 			.add(params, 'enableSSAO')
 			.name('SSAO')
 			.onChange(value => {
 				this.toggleSSAOEffect(value);
 			});
+		}
 		postFolder.open();
 	}
 

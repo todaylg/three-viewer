@@ -1,5 +1,6 @@
 // Refer: Filament
 // Anisotropy(GGX)
+#if defined(USE_TANGENT) && defined(ENABLE_ANISOTROPY)
 float D_GGX_Anisotropic(float at, float ab, float ToH, float BoH, float NoH) {
     // Burley 2012, "Physically-Based Shading at Disney"
 
@@ -61,3 +62,4 @@ void anisotropicSurfaceShading(vec3 normal, vec3 viewDir, float NoL, vec3 precom
     diffuseOut = colorAttenuate * diffuseLobe(precomputeLight, diffuse, NoL, VoH);
     specularOut = colorAttenuate * anisotropicLobe(precomputeLight, H, viewDir, lightDir, NoH, VoH, NoL, specular, f90, anisotropicT, anisotropicB, anisotropy);
 }
+#endif

@@ -22,7 +22,15 @@ import { pbrDefaultDefines, pbrDefaultUniforms } from '../const/defaultParams';
 import { adjustCameraByBox, adjustSunLightByBox } from './ThreeUtils';
 import { isMobile } from './Utils';
 // Post Procssing
-import { EffectComposer, RenderPass, EffectPass, NormalPass, DepthEffect, SSAOEffect, BlendFunction } from "MODULES/postprocessing/";
+import {
+	EffectComposer,
+	RenderPass,
+	EffectPass,
+	NormalPass,
+	DepthEffect,
+	SSAOEffect,
+	BlendFunction
+} from 'MODULES/postprocessing/';
 
 // Test
 import { GUI } from 'LIB/threejs/libs/dat.gui.module.js';
@@ -224,14 +232,14 @@ export default class ModelViewer {
 		);
 	}
 
-	initPostProcessing(){
-		let {scene, camera, renderer} = this;
-		const renderPass = this.renderPass = new RenderPass(scene, camera);
-		const normalPass = this.normalPass = new NormalPass(scene, camera);
+	initPostProcessing() {
+		let { scene, camera, renderer } = this;
+		const renderPass = (this.renderPass = new RenderPass(scene, camera));
+		const normalPass = (this.normalPass = new NormalPass(scene, camera));
 		const depthEffect = new DepthEffect({
 			blendFunction: BlendFunction.SKIP
 		});
-		const ssaoEffect = this.ssaoEffect = new SSAOEffect(camera, normalPass.renderTarget.texture, {
+		const ssaoEffect = (this.ssaoEffect = new SSAOEffect(camera, normalPass.renderTarget.texture, {
 			// For Test
 			blendFunction: BlendFunction.MULTIPLY,
 			samples: 11,
@@ -244,23 +252,23 @@ export default class ModelViewer {
 			radius: 30,
 			scale: 1.0,
 			bias: 0.05
-		});
-		const ssaoEffectPass = this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect);
+		}));
+		const ssaoEffectPass = (this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect));
 		// No need gamma again
 		ssaoEffectPass.encodeOutput = false;
 
-		const composer = this.composer = new EffectComposer(renderer, {
+		const composer = (this.composer = new EffectComposer(renderer, {
 			frameBufferType: THREE.HalfFloatType
-		});
-		
+		}));
+
 		this.toggleSSAOEffect(this.initEnableSSAO);
-		
+
 		composer.addPass(renderPass);
 		composer.addPass(normalPass);
 		composer.addPass(ssaoEffectPass);
 	}
 
-	toggleSSAOEffect(enable){
+	toggleSSAOEffect(enable) {
 		this.ssaoEffectPass.enabled = enable;
 		this.ssaoEffectPass.renderToScreen = enable;
 		this.renderPass.renderToScreen = !enable;
@@ -268,7 +276,7 @@ export default class ModelViewer {
 
 	initGUI() {
 		let gui = new GUI();
-		if(this.isMobile) gui.close();
+		if (this.isMobile) gui.close();
 		let gltfScene = this.gltfScene;
 		let params = (this.guiParams = {
 			enableIBL: !!pbrDefaultDefines.ENABLE_IBL,
@@ -515,13 +523,12 @@ export default class ModelViewer {
 			this.renderer.toneMapping = THREE[`${value}ToneMapping`];
 			this.reCompileShader(true);
 		});
-		// Todo: Fix Mobile
 		postFolder
-		.add(params, 'enableSSAO')
-		.name('SSAO')
-		.onChange(value => {
-			this.toggleSSAOEffect(value);
-		});
+			.add(params, 'enableSSAO')
+			.name('SSAO')
+			.onChange(value => {
+				this.toggleSSAOEffect(value);
+			});
 		postFolder.open();
 	}
 

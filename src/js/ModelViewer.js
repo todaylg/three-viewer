@@ -27,6 +27,8 @@ import {
 	RenderPass,
 	EffectPass,
 	NormalPass,
+	ShaderPass,
+	FXAAMaterial,
 	DepthEffect,
 	SSAOEffect,
 	BlendFunction
@@ -63,8 +65,6 @@ export default class ModelViewer {
 		this.width = mainScene.width;
 		this.height = mainScene.height;
 		this.callBack = callBack;
-
-		this.initEnableSSAO = false;
 
 		this.control = new OrbitControls(this.camera, this.container);
 		this.initScene();
@@ -255,23 +255,37 @@ export default class ModelViewer {
 		}));
 		const ssaoEffectPass = (this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect));
 		// No need gamma again
-		ssaoEffectPass.encodeOutput = false;
+		ssaoEffectPass.encodeOutput = true;
+
+		// AA
+		let fxaaMaterial = new FXAAMaterial();
+		let pixelRatio = renderer.getPixelRatio();
+		fxaaMaterial.uniforms[ 'resolution' ].value.x = 1 / ( this.width * pixelRatio );
+		fxaaMaterial.uniforms[ 'resolution' ].value.y = 1 / ( this.height * pixelRatio );
+		const fxaaPass = this.fxaaPass = new ShaderPass(fxaaMaterial);
 
 		const composer = (this.composer = new EffectComposer(renderer, {
-			frameBufferType: THREE.HalfFloatType
+			frameBufferType: THREE.HalfFloatType,
+			autoRenderToScreen: false
 		}));
-
-		this.toggleSSAOEffect(this.initEnableSSAO);
 
 		composer.addPass(renderPass);
 		composer.addPass(normalPass);
 		composer.addPass(ssaoEffectPass);
+		composer.addPass(fxaaPass);
 	}
 
 	toggleSSAOEffect(enable) {
 		this.ssaoEffectPass.enabled = enable;
-		this.ssaoEffectPass.renderToScreen = enable;
-		this.renderPass.renderToScreen = !enable;
+	}
+
+	toggleAAEffect(enable) {
+		this.fxaaPass.enabled = enable;
+		if(this.ssaoEffectPass.enabled){
+			this.ssaoEffectPass.renderToScreen = !enable;
+		}else{
+			this.renderPass.renderToScreen = !enable;
+		}
 	}
 
 	initGUI() {
@@ -309,7 +323,8 @@ export default class ModelViewer {
 			enableMSDiffuseAO: !!pbrDefaultDefines.MS_DIFFUSE_AO,
 			// Post
 			toneMapping: toneMappingList[0],
-			enableSSAO: this.initEnableSSAO
+			enableSSAO: true,
+			enableFXAA: true
 		});
 		// PBR
 		const pbrFolder = gui.addFolder('PBR');
@@ -528,6 +543,12 @@ export default class ModelViewer {
 			.name('SSAO')
 			.onChange(value => {
 				this.toggleSSAOEffect(value);
+			});
+		postFolder
+			.add(params, 'enableFXAA')
+			.name('FXAA')
+			.onChange(value => {
+				this.toggleAAEffect(value);
 			});
 		postFolder.open();
 	}

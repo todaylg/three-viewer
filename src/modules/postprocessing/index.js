@@ -8,6 +8,13 @@ export {
 } from "./effects";
 
 export {
+	CopyMaterial,
+	EffectMaterial,
+	FXAAMaterial,
+	Section,
+} from "./materials";
+
+export {
 	ClearPass,
 	ClearMaskPass,
 	DepthPass,

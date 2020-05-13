@@ -6,16 +6,13 @@
     #preImport <panoramaSampler>
 #endif
 
-#ifdef MOBILE
-    #preImport <integrateBRDFMobile>
-#else
 vec3 integrateBRDF(vec3 materialSpecular, float roughness, float NoV) {
     vec4 rgba = texture2D(uIntegrateBRDF, vec2(NoV, roughness));
     float a = (rgba[1] * 65280.0 + rgba[0] * 255.0) / 65535.0;
     float b = (rgba[3] * 65280.0 + rgba[2] * 255.0) / 65535.0;
     return (1.-materialSpecular) * a + materialSpecular * b;
 }
-#endif
+
 // frostbite, lagarde paper p67
 // http://www.frostbite.com/wp-content/uploads/2014/11/course_notes_moving_frostbite_to_pbr.pdf
 float linRoughnessToMipmap(float roughnessLinear){

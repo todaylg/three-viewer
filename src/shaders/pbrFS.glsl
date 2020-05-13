@@ -70,7 +70,6 @@ varying vec3 vWorldNormal;
 #include <map_pars_fragment>
 #include <aomap_pars_fragment>
 #include <emissivemap_pars_fragment>
-#include <bumpmap_pars_fragment>
 #include <roughnessmap_pars_fragment>
 #include <metalnessmap_pars_fragment>
 #include <packing>
@@ -246,7 +245,8 @@ void main(){
             #endif
             
             // Shadow
-            #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
+            // Mobile texture unit too little! 
+            #if !defined( MOBILE ) && defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
             directionalLightShadow = directionalLightShadows[ i ];
             shadow *= all( bvec2( directionalLight.visible, receiveShadow ) ) ? getShadow( lighted, directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ], shadowDistance ) : 1.0;
             lightDiffuse *= shadow;

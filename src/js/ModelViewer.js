@@ -516,14 +516,12 @@ export default class ModelViewer {
 			this.reCompileShader(true);
 		});
 		// Todo: Fix Mobile
-		if(!this.isMobile){
-			postFolder
-			.add(params, 'enableSSAO')
-			.name('SSAO')
-			.onChange(value => {
-				this.toggleSSAOEffect(value);
-			});
-		}
+		postFolder
+		.add(params, 'enableSSAO')
+		.name('SSAO')
+		.onChange(value => {
+			this.toggleSSAOEffect(value);
+		});
 		postFolder.open();
 	}
 

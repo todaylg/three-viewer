@@ -29,8 +29,10 @@ import {
 	NormalPass,
 	ShaderPass,
 	FXAAMaterial,
+	CopyMaterial,
 	DepthEffect,
 	SSAOEffect,
+	BloomEffect,
 	BlendFunction
 } from 'MODULES/postprocessing/';
 
@@ -253,10 +255,13 @@ export default class ModelViewer {
 			scale: 1.0,
 			bias: 0.05
 		}));
+		// SSAO
 		const ssaoEffectPass = (this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect));
-		// No need gamma again
-		ssaoEffectPass.encodeOutput = true;
 
+		// Bloom
+		const bloomEffect = new BloomEffect();
+		const bloomEffectPass = this.bloomEffectPass = new EffectPass(camera, bloomEffect);
+		
 		// AA
 		let fxaaMaterial = new FXAAMaterial();
 		let pixelRatio = renderer.getPixelRatio();
@@ -264,15 +269,22 @@ export default class ModelViewer {
 		fxaaMaterial.uniforms[ 'resolution' ].value.y = 1 / ( this.height * pixelRatio );
 		const fxaaPass = this.fxaaPass = new ShaderPass(fxaaMaterial);
 
+		const copyPass = new ShaderPass(new CopyMaterial());
 		const composer = (this.composer = new EffectComposer(renderer, {
 			frameBufferType: THREE.HalfFloatType,
-			autoRenderToScreen: false
 		}));
 
 		composer.addPass(renderPass);
 		composer.addPass(normalPass);
 		composer.addPass(ssaoEffectPass);
+		composer.addPass(bloomEffectPass);
 		composer.addPass(fxaaPass);
+		// For keep render to screen
+		composer.addPass(copyPass);
+	}
+
+	toggleBloomEffect(enable){
+		this.bloomEffectPass.enabled = enable;
 	}
 
 	toggleSSAOEffect(enable) {
@@ -281,11 +293,6 @@ export default class ModelViewer {
 
 	toggleAAEffect(enable) {
 		this.fxaaPass.enabled = enable;
-		if(this.ssaoEffectPass.enabled){
-			this.ssaoEffectPass.renderToScreen = !enable;
-		}else{
-			this.renderPass.renderToScreen = !enable;
-		}
 	}
 
 	initGUI() {
@@ -324,7 +331,8 @@ export default class ModelViewer {
 			// Post
 			toneMapping: toneMappingList[0],
 			enableSSAO: true,
-			enableFXAA: true
+			enableFXAA: true,
+			enableBloom: true
 		});
 		// PBR
 		const pbrFolder = gui.addFolder('PBR');
@@ -543,6 +551,12 @@ export default class ModelViewer {
 			.name('SSAO')
 			.onChange(value => {
 				this.toggleSSAOEffect(value);
+			});
+		postFolder
+			.add(params, 'enableBloom')
+			.name('Bloom')
+			.onChange(value => {
+				this.toggleBloomEffect(value);
 			});
 		postFolder
 			.add(params, 'enableFXAA')

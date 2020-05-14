@@ -1072,7 +1072,5 @@ void main() {
 
   // TODO avoid querying texture twice for same texel
   gl_FragColor.a = texture2D(inputBuffer, vUv).a;
-//   gl_FragColor = texture2D(inputBuffer, vUv);
-//   gl_FragColor = vec4(vUv, 0., 1.);
   #include <encodings_fragment>
 }

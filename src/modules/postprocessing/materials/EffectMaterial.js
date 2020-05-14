@@ -31,7 +31,7 @@ export class EffectMaterial extends ShaderMaterial {
 
 			defines: {
 				DEPTH_PACKING: "0",
-				ENCODE_OUTPUT: "1"
+				ENCODE_OUTPUT: "1" // Default is on
 			},
 
 			uniforms: {

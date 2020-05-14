@@ -1,3 +1,4 @@
+export { BlurPass } from "./BlurPass.js";
 export { ClearMaskPass } from "./ClearMaskPass.js";
 export { ClearPass } from "./ClearPass.js";
 export { DepthPass } from "./DepthPass.js";

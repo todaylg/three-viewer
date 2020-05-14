@@ -1,6 +1,7 @@
 export { EffectComposer } from './core';
 
 export {
+	BloomEffect,
 	BlendFunction,
 	BlendMode,
 	DepthEffect,

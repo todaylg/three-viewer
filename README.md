@@ -10,7 +10,7 @@ PBR rendering experiment of a single model, convenient comparison of rendering e
 
 ### Feature
 
-- [x] Select rendering equation(shader reload)
+- [x] Select rendering equation(reload shader)
   
 - [x] Envtools-based IBL (Spherical Harmonics Lighting/Blur Background/Cube Envmap/Sunlight)
 
@@ -62,7 +62,7 @@ npm run build
 
 - [ ] Spot/Point Light and Shadow
 
-- [ ] Post-processing(SSS、TAA)
+- [ ] Post-processing(WIP)
 
 - [ ] Ground Shadow
 

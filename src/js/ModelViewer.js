@@ -564,7 +564,6 @@ export default class ModelViewer {
 			.onChange(value => {
 				this.toggleAAEffect(value);
 			});
-		postFolder.open();
 	}
 
 	setDefinesFromGUI(defines) {

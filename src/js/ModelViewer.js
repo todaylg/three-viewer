@@ -68,6 +68,11 @@ export default class ModelViewer {
 		this.height = mainScene.height;
 		this.callBack = callBack;
 
+		// Init Post-processing status
+		this.initBloomPass = false;
+		this.initSSAOPass = true;
+		this.initFXAAPass = true;
+
 		this.control = new OrbitControls(this.camera, this.container);
 		this.initScene();
 		this.initPostProcessing();
@@ -255,12 +260,15 @@ export default class ModelViewer {
 			scale: 1.0,
 			bias: 0.05
 		}));
+
 		// SSAO
 		const ssaoEffectPass = (this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect));
+		ssaoEffectPass.enable = this.initSSAOPass;
 
 		// Bloom
 		const bloomEffect = new BloomEffect();
 		const bloomEffectPass = this.bloomEffectPass = new EffectPass(camera, bloomEffect);
+		bloomEffectPass.enabled = this.initBloomPass;
 		
 		// AA
 		let fxaaMaterial = new FXAAMaterial();
@@ -268,6 +276,7 @@ export default class ModelViewer {
 		fxaaMaterial.uniforms[ 'resolution' ].value.x = 1 / ( this.width * pixelRatio );
 		fxaaMaterial.uniforms[ 'resolution' ].value.y = 1 / ( this.height * pixelRatio );
 		const fxaaPass = this.fxaaPass = new ShaderPass(fxaaMaterial);
+		fxaaPass.enabled = this.initFXAAPass;
 
 		const copyPass = new ShaderPass(new CopyMaterial());
 		const composer = (this.composer = new EffectComposer(renderer, {
@@ -330,9 +339,9 @@ export default class ModelViewer {
 			enableMSDiffuseAO: !!pbrDefaultDefines.MS_DIFFUSE_AO,
 			// Post
 			toneMapping: toneMappingList[0],
-			enableSSAO: true,
-			enableFXAA: true,
-			enableBloom: true
+			enableSSAO: this.initSSAOPass,
+			enableFXAA: this.initFXAAPass,
+			enableBloom: this.initBloomPass
 		});
 		// PBR
 		const pbrFolder = gui.addFolder('PBR');

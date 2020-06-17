@@ -20,7 +20,7 @@ const syncUniformArr = [
 ]
 
 const bgDefaultUniforms = {
-	uBrightness:{
+	uEnvBrightness:{
 		value: 1.0
 	},
 	uEnvironmentTransform: {
@@ -44,7 +44,7 @@ const pbrDefaultUniforms = {
 	uEnvironmentTransform: {
 		value: new THREE.Matrix3()
 	},
-	uBrightness:{
+	uEnvBrightness:{
 		value: 1.0
 	},
 	uSpecularAAVariance:{

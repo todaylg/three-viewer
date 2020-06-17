@@ -70,7 +70,7 @@ export default class ModelViewer {
 
 		// Init Post-processing status
 		this.initBloomPass = false;
-		this.initSSAOPass = true;
+		this.initSSAOPass = false;
 		this.initFXAAPass = true;
 
 		this.control = new OrbitControls(this.camera, this.container);
@@ -182,9 +182,6 @@ export default class ModelViewer {
 				child.material.uniforms.uEnvBrightness = this.envBrightness;
 				child.castShadow = true;
 				child.receiveShadow = true;
-				// Test
-				child.material.uniforms.uEnableIBL = this.enableIBL;
-				child.material.uniforms.uEnableLight = this.enableLight;
 			}
 		});
 
@@ -263,7 +260,7 @@ export default class ModelViewer {
 
 		// SSAO
 		const ssaoEffectPass = (this.ssaoEffectPass = new EffectPass(camera, ssaoEffect, depthEffect));
-		ssaoEffectPass.enable = this.initSSAOPass;
+		ssaoEffectPass.enabled = this.initSSAOPass;
 
 		// Bloom
 		const bloomEffect = new BloomEffect();

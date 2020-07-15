@@ -34,7 +34,7 @@ vec3 prefilterEnvMap(float rLinear, vec3 R) {
     if (absDir.z != M) dir.z *= scale;
 	return LogLuvToLinear(textureCubeLodEXT(envMap, dir, lod)).rgb;
 #else
-    return LogLuvToLinear(panoramaSampler(envMap, uEnvironmentSize, R, lod, uEnvironmentLodRange[0])).rgb;
+    return LogLuvToLinear(texturePanoramaLod(envMap, uEnvironmentSize, R, lod, uEnvironmentLodRange[0])).rgb;
 	#endif
 }
 

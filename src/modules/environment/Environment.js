@@ -5,43 +5,48 @@ import EnvironmentCubeMap from './EnvironmentCubeMap';
 import EnvironmentPanorama from './EnvironmentPanorama';
 import IntegrateBRDFMap from './IntegrateBRDFMap';
 import EnvironmentSphericalHarmonics from './EnvironmentSphericalHarmonics';
-import fileHelper from './fileHelper';
+
 const brdfLUTPath = './assets/envMap/brdf_ue4.bin.gz';
 
 class Environment {
 	constructor(viewer) {
 		let { renderer, isMobile } = viewer;
 		this.isMobile = isMobile;
-		this._config = undefined;
-		this._files = {};
 		let ctx = renderer.getContext();
 		this.textureLODSupport = ctx.getExtension('EXT_shader_texture_lod');
+		this._config = null;
+		this._files = {};
+		this.fileLoader = new THREE.FileLoader();
 		this.uIntegrateBRDF = null;
 	}
 
 	async loadPackage(url) {
 		this.url = url;
 		const configSrc = `${url}config.json`;
-		let config = await fileHelper.requestResource(configSrc);
+		let config = await await this.loadDataFromFile(configSrc, 'json');
 		return await this.init(config);
 	}
 
 	getImage(type, encoding, format) {
 		let results = this.getTextures(type, encoding, format);
 		if (!results.length) return undefined;
-		// Add limitSize
+		// Check limitSize(Prefilter stop size)
 		if (results[0].limitSize) results[0].images[0].limitSize = results[0].limitSize;
 		return results[0].images[0];
 	}
 
 	// Filter texture by condition
-	// Todo: Sync encoding param
 	getTextures(type, encoding, format) {
 		let textures = this._config.textures;
 		let results = textures.filter(texture => {
 			return texture.encoding === encoding && texture.format === format && texture.type === type;
 		});
 		return results;
+	}
+
+	loadDataFromFile(url, responseType = 'arraybuffer'){
+		this.fileLoader.setResponseType(responseType);
+		return new Promise(resolve => this.fileLoader.load(url, data => resolve(data)));
 	}
 
 	async init(config) {
@@ -54,7 +59,7 @@ class Environment {
 		let textureData = this.getImage('specular_ue4', 'luv', envMapFormat);
 		let mapFile = textureData.file;
 		let mapSize = textureData.width;
-		let mapData = await fileHelper.requestResource(`${this.url}${mapFile}`);
+		let mapData = await this.loadDataFromFile(`${this.url}${mapFile}`);
 		if(envMapFormat === 'cubemap'){
 			this.mapEnv = new EnvironmentCubeMap(mapData, mapSize, config);
 		}else{
@@ -71,7 +76,7 @@ class Environment {
 			// LUT
 			let lutTextureData = this.getImage('brdf_ue4', 'rg16', 'lut');
 			let lutSize = lutTextureData.width;
-			let lutData = await fileHelper.requestResource(brdfLUTPath);
+			let lutData = await this.loadDataFromFile(brdfLUTPath);
 			this._integrateBRDF = new IntegrateBRDFMap(lutData, lutSize);
 			this.uIntegrateBRDF = this._integrateBRDF.loadPacked();
 		}
@@ -80,7 +85,7 @@ class Environment {
 		let bgTextureData = this.getImage('background', 'luv', 'cubemap');
 		let bgFile = bgTextureData.file;
 		let bgSize = bgTextureData.width;
-		let bgData = await fileHelper.requestResource(`${this.url}${bgFile}`);
+		let bgData = await this.loadDataFromFile(`${this.url}${bgFile}`);
 		this.backgroundEnv = new EnvironmentCubeMap(bgData, bgSize, {
 			minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter

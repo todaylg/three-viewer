@@ -45,6 +45,8 @@ export default class PanoramaEnv {
 			dataTexture.encoding = THREE.LogLuvEncoding;
 			dataTexture.flipY = true;
 			dataTexture.needsUpdate = true;
+			dataTexture.magFilter = THREE.LinearFilter;
+			dataTexture.minFilter = THREE.LinearFilter;
 			this._texture = dataTexture;
 		};
 

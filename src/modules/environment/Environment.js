@@ -70,7 +70,7 @@ class Environment {
 		let nbLod = Math.log(mapSize) / Math.LN2;
 		let maxLod = nbLod - Math.log(minTextureSize) / Math.LN2;
 		this.uEnvironmentLodRange = [nbLod, maxLod];
-		this.uEnvironmentSize = [mapSize, mapSize];
+		this.uEnvironmentSize = [mapSize, envMapFormat == 'cubemap'? mapSize: mapSize/2];
 		
 		if(!this.uIntegrateBRDF){
 			// LUT

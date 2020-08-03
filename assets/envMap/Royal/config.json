@@ -129,7 +129,23 @@
                 }
             ], 
             "type": "background"
-        }, 
+        },
+        {
+            "encoding": "luv", 
+            "format": "panorama", 
+            "images": [
+                {
+                    "file": "specular_panorama_ue4_1024_luv.bin.gz", 
+                    "height": 1024, 
+                    "samples": 1024, 
+                    "sizeCompressed": 1113474, 
+                    "sizeUncompressed": 4194304, 
+                    "width": 1024
+                }
+            ], 
+            "limitSize": 32, 
+            "type": "specular_ue4"
+        },
         {
             "encoding": "luv", 
             "format": "cubemap", 
